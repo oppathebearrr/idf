@@ -1,0 +1,1 @@
+- [Project handoff imports](project-handoff-imports.md) — after a conversation-to-project move, inspect preserved transition files before assuming the active root contains the imported repository.

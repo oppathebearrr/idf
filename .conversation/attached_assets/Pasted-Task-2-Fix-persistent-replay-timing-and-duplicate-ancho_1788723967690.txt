@@ -1,0 +1,36 @@
+Task #2: Fix persistent replay timing and duplicate-anchor bugs.
+Two bugs are occurring:
+Bug A — Applying a preset creates two entries. The expected workflow is:
+User selects an original DOM element.
+User clicks Duplicate.
+Exactly one clone is inserted immediately above the original.
+User applies a preset.
+The preset modifies that existing clone in place.
+A persistent rule is saved for future page loads.
+Applying/saving a preset must not trigger persistent replay during the current editing session. The current manually-created clone already represents the rule's applied state.
+Mark the saved rule as applied for the current document/session, so MutationObserver or rule initialization cannot create a second clone.
+Persistent replay should occur only on a fresh page/document load, navigation, or explicit restore action.
+The saved rule must always anchor to the original selected element. Never select or anchor against an extension-created element. Exclude elements containing the extension-owned marker attribute from all target matching.
+Expected structure at all times:
+ONE extension-created clone → ORIGINAL anchor
+Never:
+Clone → Clone → Original
+Bug B — Persistent changes do not appear until the extension is clicked after refresh.
+Persistent replay must initialize automatically when the matching webpage loads. Opening/clicking the extension popup must not be required.
+Ensure the content script responsible for persistent rules is registered to run automatically via the extension manifest on supported pages.
+On document load, automatically:
+Initialize persistent rule storage.
+Check global persistence state.
+Check site persistence state.
+Load matching rules.
+Wait for late-rendered DOM targets.
+Replay each enabled rule once.
+The popup should only control the extension and display state; persistent replay must work even if the user never opens the extension UI.
+After implementing, verify:
+Duplicate + preset produces exactly one new entry.
+Refresh produces exactly one persistent entry.
+The persistent entry is immediately above the original anchor.
+Refreshing repeatedly never accumulates clones.
+Persistent changes appear without clicking/opening the extension.
+Late-rendered targets still work.
+Existing duplicate/preset behavior remains unchanged.
