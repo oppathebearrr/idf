@@ -6,7 +6,7 @@ export const persistentRulesRuntime = String.raw`
   const STORAGE_KEY = 'content-rules';
   const RULE_ATTR = 'data-security-inspection-rule-id';
   const TEXT_RULE_ATTR = 'data-security-inspection-text-rule-id';
-  const RULES_VERSION = 2;
+   const RULES_VERSION = 3;
 
   const pageKey = () => window.location.origin + window.location.pathname;
   const siteKey = () => window.location.origin;
@@ -123,6 +123,15 @@ export const persistentRulesRuntime = String.raw`
       (current, index) => (current ? current.children[index] : null),
       root,
     );
+   const getElementTextSignature = (element) => {
+     const text = (element.textContent || '').replace(/\s+/g, ' ').trim();
+     let hash = 2166136261;
+     for (let index = 0; index < text.length; index += 1) {
+       hash ^= text.charCodeAt(index);
+       hash = Math.imul(hash, 16777619);
+     }
+     return text.length + ':' + (hash >>> 0);
+   };
   const getTextNodeAtPath = (root, path) => {
     const target = path.reduce(
       (current, index) => (current ? current.childNodes[index] : null),
@@ -196,13 +205,20 @@ export const persistentRulesRuntime = String.raw`
     } catch (_error) {
       return null;
     }
-    return (
-      candidates.find(
-        (element) =>
-          (rule.mode === 'text' || !extensionOwned(element)) &&
-          element.tagName.toLowerCase() === rule.anchorTagName,
-      ) || null
-    );
+     const matchingCandidates = candidates.filter(
+       (element) =>
+         (rule.mode === 'text' || !extensionOwned(element)) &&
+         element.tagName.toLowerCase() === rule.anchorTagName,
+     );
+     if (rule.mode === 'duplicate' && rule.anchorTextSignature) {
+       return (
+         matchingCandidates.find(
+           (element) =>
+             getElementTextSignature(element) === rule.anchorTextSignature,
+         ) || null
+       );
+     }
+     return matchingCandidates[0] || null;
   };
 
   const applyRule = (rule) => {
@@ -269,7 +285,10 @@ export const persistentRulesRuntime = String.raw`
               rule.mode === 'duplicate') &&
             (rule.blockMode === 'replace' || rule.blockMode === 'insert') &&
             typeof rule.content === 'string' &&
-            (storedVersion >= RULES_VERSION || rule.mode !== 'text'),
+             (storedVersion >= 2 || rule.mode !== 'text') &&
+             (storedVersion >= RULES_VERSION ||
+               rule.mode !== 'duplicate' ||
+               typeof rule.anchorTextSignature === 'string'),
         )
       : [];
     const siteSettings =

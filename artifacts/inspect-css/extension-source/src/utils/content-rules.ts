@@ -8,7 +8,7 @@ import {
   sanitizeBlockHTML,
 } from './content-presets';
 
-export const CONTENT_RULES_VERSION = 2;
+export const CONTENT_RULES_VERSION = 3;
 export const CONTENT_RULES_KEY = 'content-rules';
 export const PERSISTENT_RULE_ATTR = 'data-security-inspection-rule-id';
 export const PERSISTENT_TEXT_RULE_ATTR =
@@ -27,6 +27,7 @@ export interface PersistentContentRule {
   mode: PersistentRuleMode;
   blockMode: PersistentBlockMode;
   content: string;
+  anchorTextSignature?: string;
   targetPath?: number[];
   textPath?: number[];
   enabled: boolean;
@@ -93,6 +94,10 @@ function normalizeRule(input: unknown): PersistentContentRule | null {
     mode: candidate.mode,
     blockMode: candidate.blockMode,
     content: candidate.content,
+    anchorTextSignature:
+      typeof candidate.anchorTextSignature === 'string'
+        ? candidate.anchorTextSignature
+        : undefined,
     targetPath: Array.isArray(candidate.targetPath)
       ? candidate.targetPath.filter(
           (segment): segment is number =>
@@ -126,7 +131,13 @@ function normalizeLibrary(input: unknown): ContentRuleLibrary {
   const normalizedRules = Array.isArray(candidate.rules)
     ? candidate.rules
         .map(normalizeRule)
-        .filter((rule) => storedVersion >= CONTENT_RULES_VERSION || rule.mode !== 'text')
+        .filter(
+          (rule) =>
+            (storedVersion >= 2 || rule.mode !== 'text') &&
+            (storedVersion >= CONTENT_RULES_VERSION ||
+              rule.mode !== 'duplicate' ||
+              Boolean(rule.anchorTextSignature)),
+        )
         .filter((rule): rule is PersistentContentRule => Boolean(rule))
     : [];
   const seenTextTargets = new Set<string>();
@@ -187,6 +198,16 @@ function escapeIdentifier(value: string) {
   }
 
   return value.replace(/[^\w-]/g, '\\$&');
+}
+
+export function getElementTextSignature(element: Element) {
+  const text = (element.textContent ?? '').replace(/\s+/g, ' ').trim();
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `${text.length}:${hash >>> 0}`;
 }
 
 function isExtensionOwned(element: Element) {
@@ -261,6 +282,8 @@ export function createPersistentContentRule(
     mode,
     blockMode,
     content: mode === 'block' ? sanitizeBlockHTML(content) : content,
+    anchorTextSignature:
+      mode === 'duplicate' ? getElementTextSignature(anchor) : undefined,
     targetPath: getElementPath(anchor, target) ?? [],
     textPath: textPath ?? undefined,
     enabled: true,
@@ -271,11 +294,18 @@ export function createPersistentContentRule(
 
 function findAnchor(rule: PersistentContentRule) {
   try {
-    return [...document.querySelectorAll(rule.selector)].find(
+    const candidates = [...document.querySelectorAll(rule.selector)].filter(
       (element) =>
         (rule.mode === 'text' || !isExtensionOwned(element)) &&
         element.tagName.toLowerCase() === rule.anchorTagName,
     );
+    if (rule.mode === 'duplicate' && rule.anchorTextSignature) {
+      return candidates.find(
+        (element) =>
+          getElementTextSignature(element) === rule.anchorTextSignature,
+      );
+    }
+    return candidates[0];
   } catch {
     return null;
   }

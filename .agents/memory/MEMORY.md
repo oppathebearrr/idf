@@ -1,1 +1,2 @@
 - [Project handoff imports](project-handoff-imports.md) — after a conversation-to-project move, inspect preserved transition files before assuming the active root contains the imported repository.
+- [Dynamic duplicate anchors](dynamic-duplicate-anchors.md) — generic CSS selectors can retarget persistent duplicates after dynamic page rebuilds; replay needs an anchor identity check.

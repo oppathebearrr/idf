@@ -5,7 +5,7 @@ export const presetRuntime = String.raw`
 
   const STORAGE_KEY = 'content-presets';
   const RULES_STORAGE_KEY = 'content-rules';
-  const RULES_VERSION = 2;
+  const RULES_VERSION = 3;
   const SELECTED_ATTR = 'inspect-css-selected';
   const RULE_ATTR = 'data-security-inspection-rule-id';
   const TEXT_RULE_ATTR = 'data-security-inspection-text-rule-id';
@@ -382,6 +382,15 @@ export const presetRuntime = String.raw`
   const ruleSiteKey = () => window.location.origin;
   const ruleId = () =>
     'rule-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  const elementTextSignature = (element) => {
+    const text = (element.textContent || '').replace(/\s+/g, ' ').trim();
+    let hash = 2166136261;
+    for (let index = 0; index < text.length; index += 1) {
+      hash ^= text.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return text.length + ':' + (hash >>> 0);
+  };
   const escapeSelector = (value) =>
     window.CSS && typeof window.CSS.escape === 'function'
       ? window.CSS.escape(value)
@@ -631,7 +640,10 @@ export const presetRuntime = String.raw`
               rule.mode === 'duplicate') &&
             (rule.blockMode === 'replace' || rule.blockMode === 'insert') &&
             typeof rule.content === 'string' &&
-            (storedVersion >= RULES_VERSION || rule.mode !== 'text'),
+            (storedVersion >= 2 || rule.mode !== 'text') &&
+            (storedVersion >= RULES_VERSION ||
+              rule.mode !== 'duplicate' ||
+              typeof rule.anchorTextSignature === 'string'),
         )
       : [];
     const seenTextTargets = new Set();
@@ -709,6 +721,8 @@ export const presetRuntime = String.raw`
       mode: modeName,
       blockMode: blockModeName || 'replace',
       content: modeName === 'block' ? safeHTML(content) : content,
+      anchorTextSignature:
+        modeName === 'duplicate' ? elementTextSignature(anchor) : undefined,
       targetPath: getElementPath(anchor, target) || [],
       textPath: Array.isArray(textPath) ? textPath : undefined,
       enabled: true,
@@ -771,13 +785,20 @@ export const presetRuntime = String.raw`
     } catch (_error) {
       return null;
     }
-    return (
-      candidates.find(
-        (element) =>
-          (rule.mode === 'text' || !extensionOwned(element)) &&
-          element.tagName.toLowerCase() === rule.anchorTagName,
-      ) || null
+    const matchingCandidates = candidates.filter(
+      (element) =>
+        (rule.mode === 'text' || !extensionOwned(element)) &&
+        element.tagName.toLowerCase() === rule.anchorTagName,
     );
+    if (rule.mode === 'duplicate' && rule.anchorTextSignature) {
+      return (
+        matchingCandidates.find(
+          (element) =>
+            elementTextSignature(element) === rule.anchorTextSignature,
+        ) || null
+      );
+    }
+    return matchingCandidates[0] || null;
   };
   const applyPersistentRule = (rule) => {
     const ruleAttr = rule.mode === 'text' ? TEXT_RULE_ATTR : RULE_ATTR;
