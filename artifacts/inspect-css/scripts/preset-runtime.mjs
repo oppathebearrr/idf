@@ -602,7 +602,7 @@ export const presetRuntime = String.raw`
   };
   const normalizeRuleLibrary = (value) => {
     const input = value && typeof value === 'object' ? value : {};
-    const rules = Array.isArray(input.rules)
+    const normalizedRules = Array.isArray(input.rules)
       ? input.rules.filter(
           (rule) =>
             rule &&
@@ -617,6 +617,23 @@ export const presetRuntime = String.raw`
             typeof rule.content === 'string',
         )
       : [];
+    const seenTextTargets = new Set();
+    const rules = [...normalizedRules]
+      .reverse()
+      .filter((rule) => {
+        if (rule.mode !== 'text') return true;
+        const key = [
+          rule.pageKey,
+          rule.siteKey,
+          rule.selector,
+          rule.anchorTagName,
+          (Array.isArray(rule.targetPath) ? rule.targetPath : []).join(','),
+        ].join('|');
+        if (seenTextTargets.has(key)) return false;
+        seenTextTargets.add(key);
+        return true;
+      })
+      .reverse();
     const siteSettings =
       input.siteSettings && typeof input.siteSettings === 'object'
         ? Object.fromEntries(
@@ -696,7 +713,17 @@ export const presetRuntime = String.raw`
       target,
       textPath,
     );
-    ruleLibrary.rules = ruleLibrary.rules.concat(rule);
+    const isSameTextTarget = (existing) =>
+      existing.mode === 'text' &&
+      existing.pageKey === rule.pageKey &&
+      existing.siteKey === rule.siteKey &&
+      existing.selector === rule.selector &&
+      existing.anchorTagName === rule.anchorTagName &&
+      JSON.stringify(existing.targetPath || []) ===
+        JSON.stringify(rule.targetPath || []);
+    ruleLibrary.rules = ruleLibrary.rules
+      .filter((existing) => !isSameTextTarget(existing))
+      .concat(rule);
     const elements = Array.isArray(injectedElements)
       ? injectedElements
       : [injectedElements];

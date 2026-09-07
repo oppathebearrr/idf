@@ -500,9 +500,20 @@ async function savePersistentRule(
     textPath,
   );
   const library = await loadContentRuleLibrary();
+  const isSameTextTarget = (existing: PersistentContentRule) =>
+    existing.mode === 'text' &&
+    existing.pageKey === rule.pageKey &&
+    existing.siteKey === rule.siteKey &&
+    existing.selector === rule.selector &&
+    existing.anchorTagName === rule.anchorTagName &&
+    JSON.stringify(existing.targetPath ?? []) ===
+      JSON.stringify(rule.targetPath ?? []);
   const nextLibrary: ContentRuleLibrary = {
     ...library,
-    rules: [...library.rules, rule],
+    rules: [
+      ...library.rules.filter((existing) => !isSameTextTarget(existing)),
+      rule,
+    ],
   };
 
   const elements = Array.isArray(injectedElements)

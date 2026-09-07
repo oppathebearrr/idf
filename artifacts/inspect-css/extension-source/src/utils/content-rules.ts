@@ -117,11 +117,28 @@ function normalizeLibrary(input: unknown): ContentRuleLibrary {
   if (!input || typeof input !== 'object') return emptyLibrary;
 
   const candidate = input as Partial<ContentRuleLibrary>;
-  const rules = Array.isArray(candidate.rules)
+  const normalizedRules = Array.isArray(candidate.rules)
     ? candidate.rules
         .map(normalizeRule)
         .filter((rule): rule is PersistentContentRule => Boolean(rule))
     : [];
+  const seenTextTargets = new Set<string>();
+  const rules = [...normalizedRules]
+    .reverse()
+    .filter((rule) => {
+      if (rule.mode !== 'text') return true;
+      const key = [
+        rule.pageKey,
+        rule.siteKey,
+        rule.selector,
+        rule.anchorTagName,
+        (rule.targetPath ?? []).join(','),
+      ].join('|');
+      if (seenTextTargets.has(key)) return false;
+      seenTextTargets.add(key);
+      return true;
+    })
+    .reverse();
 
   const siteSettings =
     candidate.siteSettings && typeof candidate.siteSettings === 'object'
