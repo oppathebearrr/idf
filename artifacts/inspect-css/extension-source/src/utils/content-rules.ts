@@ -4,6 +4,7 @@ import {
   createUniqueClone,
   getElementAtPath,
   getElementPath,
+  normalizeDuplicatePlacement,
   sanitizeBlockHTML,
 } from './content-presets';
 
@@ -261,6 +262,7 @@ function applyRule(rule: PersistentContentRule) {
   const clone = createUniqueClone(anchor);
   clone.setAttribute(PERSISTENT_RULE_ATTR, rule.id);
   anchor.parentElement.insertBefore(clone, anchor);
+  normalizeDuplicatePlacement(clone, anchor);
   const target = getElementAtPath(clone, rule.targetPath ?? []);
   if (!target) {
     clone.remove();

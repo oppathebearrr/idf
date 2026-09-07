@@ -331,6 +331,7 @@ import {
   getElementPath,
   getPreferredTextNodePath,
   loadContentPresetLibrary,
+  normalizeDuplicatePlacement,
   sanitizeBlockHTML,
   saveContentPresetLibrary,
   type ContentPreset,
@@ -459,6 +460,7 @@ function duplicateElement() {
   const targetPath = getElementPath(scope, source) ?? [];
   const targetClone = getElementAtPath(clone, targetPath) ?? clone;
   scope.parentElement.insertBefore(clone, scope);
+  normalizeDuplicatePlacement(clone, scope);
   [clone, ...clone.querySelectorAll('*')].forEach((clonedElement) => {
     const path = getElementPath(clone, clonedElement) ?? [];
     const originalElement = getElementAtPath(scope, path) ?? scope;

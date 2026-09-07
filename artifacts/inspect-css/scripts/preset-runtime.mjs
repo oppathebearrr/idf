@@ -547,16 +547,58 @@ export const presetRuntime = String.raw`
   const findDuplicateScope = (element) => {
     const interactiveScope = findInteractiveScope(element);
     if (interactiveScope !== element) return interactiveScope;
-    const position = getComputedStyle(element).position;
-    if (position !== 'absolute' && position !== 'fixed') return element;
+    const style = getComputedStyle(element);
+    if (
+      style.position !== 'absolute' &&
+      style.position !== 'fixed' &&
+      style.display !== 'inline' &&
+      style.display !== 'contents'
+    ) {
+      return element;
+    }
     let ancestor = element.parentElement;
     while (ancestor && ancestor !== document.body) {
-      if (getComputedStyle(ancestor).position !== 'static') return ancestor;
+      const ancestorStyle = getComputedStyle(ancestor);
+      if (
+        ancestorStyle.position !== 'static' ||
+        (style.display === 'inline' && ancestorStyle.display !== 'inline')
+      ) {
+        return ancestor;
+      }
       ancestor = ancestor.parentElement;
     }
     return element.parentElement && element.parentElement !== document.body
       ? element.parentElement
       : element;
+  };
+  const normalizeDuplicatePlacement = (clone, original) => {
+    const cloneRect = clone.getBoundingClientRect();
+    const originalRect = original.getBoundingClientRect();
+    const cloneArea = cloneRect.width * cloneRect.height;
+    const originalArea = originalRect.width * originalRect.height;
+    if (!cloneArea || !originalArea) return;
+    const overlapWidth = Math.max(
+      0,
+      Math.min(cloneRect.right, originalRect.right) -
+        Math.max(cloneRect.left, originalRect.left),
+    );
+    const overlapHeight = Math.max(
+      0,
+      Math.min(cloneRect.bottom, originalRect.bottom) -
+        Math.max(cloneRect.top, originalRect.top),
+    );
+    const overlapArea = overlapWidth * overlapHeight;
+    if (overlapArea < Math.min(cloneArea, originalArea) * 0.8) return;
+    clone.style.setProperty('position', 'relative', 'important');
+    clone.style.setProperty('inset', 'auto', 'important');
+    clone.style.setProperty('top', 'auto', 'important');
+    clone.style.setProperty('right', 'auto', 'important');
+    clone.style.setProperty('bottom', 'auto', 'important');
+    clone.style.setProperty('left', 'auto', 'important');
+    clone.style.setProperty('transform', 'none', 'important');
+    clone.style.setProperty('grid-area', 'auto', 'important');
+    clone.style.setProperty('grid-column', 'auto', 'important');
+    clone.style.setProperty('grid-row', 'auto', 'important');
   };
   const normalizeRuleLibrary = (value) => {
     const input = value && typeof value === 'object' ? value : {};
@@ -689,6 +731,7 @@ export const presetRuntime = String.raw`
     const clone = uniqueClone(anchor);
     clone.setAttribute(RULE_ATTR, rule.id);
     anchor.parentElement.insertBefore(clone, anchor);
+    normalizeDuplicatePlacement(clone, anchor);
     const target = getElementAtPath(clone, rule.targetPath || []);
     if (!target) {
       clone.remove();
@@ -907,6 +950,7 @@ export const presetRuntime = String.raw`
     const targetPath = getElementPath(scope, element) || [];
     const targetClone = getElementAtPath(clone, targetPath) || clone;
     scope.parentElement.insertBefore(clone, scope);
+    normalizeDuplicatePlacement(clone, scope);
     Array.from([clone, ...clone.querySelectorAll('*')]).forEach((clonedElement) => {
       const path = getElementPath(clone, clonedElement) || [];
       const originalElement = getElementAtPath(scope, path) || scope;
