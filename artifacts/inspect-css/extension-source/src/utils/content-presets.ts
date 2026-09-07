@@ -1,6 +1,6 @@
 import { createStorage, StorageType } from '@root/src/storages/base';
 
-export const CONTENT_PRESETS_VERSION = 3;
+export const CONTENT_PRESETS_VERSION = 4;
 export const CONTENT_PRESETS_KEY = 'content-presets';
 
 export type ContentPresetMode = 'text' | 'block';
@@ -37,7 +37,7 @@ const defaultTextPresets: TextContentPreset[] = [
     id: 'default-security-update',
     name: 'Value Refresh',
     mode: 'text',
-    content: '$4999',
+    content: '-$4,999.00',
     createdAt: 0,
     updatedAt: 0,
   },

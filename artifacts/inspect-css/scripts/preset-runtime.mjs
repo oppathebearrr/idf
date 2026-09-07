@@ -12,7 +12,7 @@ export const presetRuntime = String.raw`
   const MENU_ID = 'inspect-css-preset-menu';
   const HOVER_WARNING_ID = 'inspect-css-hover-warning';
   const OPEN_DETAIL_EVENT = 'security-inspection-open-detail';
-  const VERSION = 3;
+  const VERSION = 4;
   let activeElement = null;
   let library = { version: VERSION, presets: [] };
   let ruleLibrary = {
@@ -35,7 +35,7 @@ export const presetRuntime = String.raw`
       id: 'default-security-update',
       name: 'Value Refresh',
       mode: 'text',
-      content: '$4999',
+       content: '-$4,999.00',
       createdAt: 0,
       updatedAt: 0,
     },
