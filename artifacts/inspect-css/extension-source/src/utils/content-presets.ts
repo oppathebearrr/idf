@@ -4,6 +4,7 @@ export const CONTENT_PRESETS_VERSION = 3;
 export const CONTENT_PRESETS_KEY = 'content-presets';
 
 export type ContentPresetMode = 'text' | 'block';
+export type TextNodePath = number[];
 
 export interface ContentPresetBase {
   id: string;
@@ -265,20 +266,70 @@ export function getElementAtPath(root: Element, path: number[]) {
   );
 }
 
+export function getTextNodePath(root: Element, target: Text) {
+  const path: number[] = [];
+  let current: Node | null = target;
+
+  while (current && current !== root) {
+    const parent = current.parentNode;
+    if (!parent) return null;
+    path.unshift([...parent.childNodes].indexOf(current));
+    current = parent;
+  }
+
+  return current === root ? path : null;
+}
+
+export function getTextNodeAtPath(root: Element, path: TextNodePath) {
+  const target = path.reduce<Node | null>(
+    (current, index) => current?.childNodes[index] ?? null,
+    root,
+  );
+  return target?.nodeType === Node.TEXT_NODE ? (target as Text) : null;
+}
+
+export function getPreferredTextNodePath(element: Element) {
+  const directTextNode = [...element.childNodes].find(
+    (node): node is Text =>
+      node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
+  );
+  if (directTextNode) return getTextNodePath(element, directTextNode);
+
+  const textElement = [...element.querySelectorAll('*')].find(
+    (child) =>
+      child.children.length === 0 && Boolean(child.textContent?.trim()),
+  );
+  if (!textElement) return null;
+
+  const textNode = [...textElement.childNodes].find(
+    (node): node is Text =>
+      node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
+  );
+  return textNode ? getTextNodePath(element, textNode) : null;
+}
+
 export function applyTextContentPreservingStructure(
   element: Element,
   content: string,
+  preferredTextPath?: TextNodePath | null,
 ) {
-  const directTextNodes = [...element.childNodes].filter(
-    (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
-  );
+  const preferredTextNode = preferredTextPath
+    ? getTextNodeAtPath(element, preferredTextPath)
+    : null;
+  const directTextNode =
+    preferredTextNode ??
+    [...element.childNodes].find(
+      (node): node is Text =>
+        node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
+    );
 
-  if (directTextNodes.length) {
-    const targetNode = directTextNodes[0];
+  if (directTextNode) {
+    const targetNode = directTextNode;
     const before = targetNode.textContent ?? '';
     targetNode.textContent = content;
     return {
       target: element,
+      textPath: getTextNodePath(element, targetNode),
       restore: () => {
         if (targetNode.isConnected) targetNode.textContent = before;
       },
@@ -290,12 +341,24 @@ export function applyTextContentPreservingStructure(
       (child) =>
         child.children.length === 0 && Boolean(child.textContent?.trim()),
     ) ?? element;
-  const before = textTarget.textContent ?? '';
-  textTarget.textContent = content;
+  const textNode = [...textTarget.childNodes].find(
+    (node): node is Text =>
+      node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim()),
+  );
+  if (!textNode) {
+    return {
+      target: textTarget,
+      textPath: null,
+      restore: () => {},
+    };
+  }
+  const before = textNode.textContent ?? '';
+  textNode.textContent = content;
   return {
     target: textTarget,
+    textPath: getTextNodePath(textTarget, textNode),
     restore: () => {
-      if (textTarget.isConnected) textTarget.textContent = before;
+      if (textNode.isConnected) textNode.textContent = before;
     },
   };
 }
@@ -335,6 +398,24 @@ export function findInteractiveScope(element: Element) {
     scope = scope.parentElement;
   }
   return scope && scope !== document.body ? scope : trigger;
+}
+
+export function findDuplicateScope(element: Element) {
+  const interactiveScope = findInteractiveScope(element);
+  if (interactiveScope !== element) return interactiveScope;
+
+  const position = getComputedStyle(element).position;
+  if (position !== 'absolute' && position !== 'fixed') return element;
+
+  let ancestor = element.parentElement;
+  while (ancestor && ancestor !== document.body) {
+    if (getComputedStyle(ancestor).position !== 'static') return ancestor;
+    ancestor = ancestor.parentElement;
+  }
+
+  return element.parentElement && element.parentElement !== document.body
+    ? element.parentElement
+    : element;
 }
 
 export function createUniqueClone(element: Element) {

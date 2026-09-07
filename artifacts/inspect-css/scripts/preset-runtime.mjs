@@ -22,6 +22,7 @@ export const presetRuntime = String.raw`
   const history = [];
   const pendingAnchors = new WeakMap();
   const pendingOriginalTargets = new WeakMap();
+  const pendingTextPaths = new WeakMap();
   const defaultPresets = [
     {
       id: 'default-security-update',
@@ -430,16 +431,60 @@ export const presetRuntime = String.raw`
       (current, index) => (current ? current.children[index] : null),
       root,
     );
-  const applyTextContentPreservingStructure = (element, content) => {
-    const directTextNodes = Array.from(element.childNodes).filter(
+  const getTextNodePath = (root, target) => {
+    const path = [];
+    let current = target;
+    while (current && current !== root) {
+      const parent = current.parentNode;
+      if (!parent) return null;
+      path.unshift(Array.from(parent.childNodes).indexOf(current));
+      current = parent;
+    }
+    return current === root ? path : null;
+  };
+  const getTextNodeAtPath = (root, path) => {
+    const target = path.reduce(
+      (current, index) => (current ? current.childNodes[index] : null),
+      root,
+    );
+    return target && target.nodeType === Node.TEXT_NODE ? target : null;
+  };
+  const getPreferredTextNodePath = (element) => {
+    const directTextNode = Array.from(element.childNodes).find(
       (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
     );
-    if (directTextNodes.length) {
-      const targetNode = directTextNodes[0];
+    if (directTextNode) return getTextNodePath(element, directTextNode);
+    const textElement = Array.from(element.querySelectorAll('*')).find(
+      (child) =>
+        child.children.length === 0 &&
+        Boolean(child.textContent && child.textContent.trim()),
+    );
+    if (!textElement) return null;
+    const textNode = Array.from(textElement.childNodes).find(
+      (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
+    );
+    return textNode ? getTextNodePath(element, textNode) : null;
+  };
+  const applyTextContentPreservingStructure = (
+    element,
+    content,
+    preferredTextPath,
+  ) => {
+    const preferredTextNode = Array.isArray(preferredTextPath)
+      ? getTextNodeAtPath(element, preferredTextPath)
+      : null;
+    const directTextNode =
+      preferredTextNode ||
+      Array.from(element.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
+      );
+    if (directTextNode) {
+      const targetNode = directTextNode;
       const before = targetNode.textContent || '';
       targetNode.textContent = content;
       return {
         target: element,
+        textPath: getTextNodePath(element, targetNode),
         restore: () => {
           if (targetNode.isConnected) targetNode.textContent = before;
         },
@@ -451,12 +496,19 @@ export const presetRuntime = String.raw`
           child.children.length === 0 &&
           Boolean(child.textContent && child.textContent.trim()),
       ) || element;
-    const before = textTarget.textContent || '';
-    textTarget.textContent = content;
+    const textNode = Array.from(textTarget.childNodes).find(
+      (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
+    );
+    if (!textNode) {
+      return { target: textTarget, textPath: null, restore: () => {} };
+    }
+    const before = textNode.textContent || '';
+    textNode.textContent = content;
     return {
       target: textTarget,
+      textPath: getTextNodePath(textTarget, textNode),
       restore: () => {
-        if (textTarget.isConnected) textTarget.textContent = before;
+        if (textNode.isConnected) textNode.textContent = before;
       },
     };
   };
@@ -491,6 +543,20 @@ export const presetRuntime = String.raw`
       scope = scope.parentElement;
     }
     return scope && scope !== document.body ? scope : trigger;
+  };
+  const findDuplicateScope = (element) => {
+    const interactiveScope = findInteractiveScope(element);
+    if (interactiveScope !== element) return interactiveScope;
+    const position = getComputedStyle(element).position;
+    if (position !== 'absolute' && position !== 'fixed') return element;
+    let ancestor = element.parentElement;
+    while (ancestor && ancestor !== document.body) {
+      if (getComputedStyle(ancestor).position !== 'static') return ancestor;
+      ancestor = ancestor.parentElement;
+    }
+    return element.parentElement && element.parentElement !== document.body
+      ? element.parentElement
+      : element;
   };
   const normalizeRuleLibrary = (value) => {
     const input = value && typeof value === 'object' ? value : {};
@@ -549,6 +615,7 @@ export const presetRuntime = String.raw`
     content,
     blockModeName,
     target = anchor,
+    textPath,
   ) => {
     const now = Date.now();
     return {
@@ -562,6 +629,7 @@ export const presetRuntime = String.raw`
       blockMode: blockModeName || 'replace',
       content: modeName === 'block' ? safeHTML(content) : content,
       targetPath: getElementPath(anchor, target) || [],
+      textPath: Array.isArray(textPath) ? textPath : undefined,
       enabled: true,
       createdAt: now,
       updatedAt: now,
@@ -575,6 +643,7 @@ export const presetRuntime = String.raw`
     content,
     blockModeName,
     name,
+    textPath,
   ) => {
     const rule = createPersistentRule(
       name,
@@ -583,6 +652,7 @@ export const presetRuntime = String.raw`
       content,
       blockModeName,
       target,
+      textPath,
     );
     ruleLibrary.rules = ruleLibrary.rules.concat(rule);
     const elements = Array.isArray(injectedElements)
@@ -625,7 +695,7 @@ export const presetRuntime = String.raw`
       return false;
     }
     if (rule.mode === 'text') {
-      applyTextContentPreservingStructure(target, rule.content);
+      applyTextContentPreservingStructure(target, rule.content, rule.textPath);
       return true;
     }
     const template = document.createElement('template');
@@ -721,6 +791,7 @@ export const presetRuntime = String.raw`
     const textChange = applyTextContentPreservingStructure(
       element,
       preset.content,
+      pendingTextPaths.get(element),
     );
     record('Apply ' + preset.name, () => {
       textChange.restore();
@@ -741,6 +812,7 @@ export const presetRuntime = String.raw`
       preset.content,
       'replace',
       preset.name,
+      textChange.textPath,
     )
       .then(() => say(preset.name + ' applied and saved as a persistent rule.'))
       .catch(() => say(preset.name + ' applied, but could not be saved.'));
@@ -829,7 +901,7 @@ export const presetRuntime = String.raw`
   const duplicate = () => {
     const element = selected();
     if (!element) return say('Select an element first.');
-    const scope = findInteractiveScope(element);
+    const scope = findDuplicateScope(element);
     if (!scope.parentElement) return say('Unable to duplicate this element.');
     const clone = uniqueClone(scope);
     const targetPath = getElementPath(scope, element) || [];
@@ -840,6 +912,10 @@ export const presetRuntime = String.raw`
       const originalElement = getElementAtPath(scope, path) || scope;
       pendingAnchors.set(clonedElement, scope);
       pendingOriginalTargets.set(clonedElement, originalElement);
+      pendingTextPaths.set(
+        clonedElement,
+        getPreferredTextNodePath(originalElement),
+      );
     });
     record('Duplicate element', () => clone.remove());
     refreshSelection(targetClone);

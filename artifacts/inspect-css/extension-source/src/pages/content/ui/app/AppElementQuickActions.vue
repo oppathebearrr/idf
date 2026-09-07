@@ -326,9 +326,10 @@ import {
   createBlockContentPreset,
   createTextContentPreset,
   createUniqueClone,
-  findInteractiveScope,
+  findDuplicateScope,
   getElementAtPath,
   getElementPath,
+  getPreferredTextNodePath,
   loadContentPresetLibrary,
   sanitizeBlockHTML,
   saveContentPresetLibrary,
@@ -381,6 +382,7 @@ const currentSiteRules = computed(() =>
 );
 const pendingAnchors = new WeakMap<Element, Element>();
 const pendingOriginalTargets = new WeakMap<Element, Element>();
+const pendingTextPaths = new WeakMap<Element, number[] | null>();
 let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
 
 const filteredPresets = computed(() =>
@@ -448,7 +450,7 @@ function duplicateElement() {
   }
 
   const source = selectedEl.value;
-  const scope = findInteractiveScope(source);
+  const scope = findDuplicateScope(source);
   if (!scope.parentElement) {
     showFeedback('Unable to duplicate this element.');
     return;
@@ -462,6 +464,10 @@ function duplicateElement() {
     const originalElement = getElementAtPath(scope, path) ?? scope;
     pendingAnchors.set(clonedElement, scope);
     pendingOriginalTargets.set(clonedElement, originalElement);
+    pendingTextPaths.set(
+      clonedElement,
+      getPreferredTextNodePath(originalElement),
+    );
   });
   recordContentHistory({
     label: 'Duplicate element',
@@ -480,6 +486,7 @@ async function savePersistentRule(
   content: string,
   blockMode: 'replace' | 'insert',
   name: string,
+  textPath?: number[] | null,
 ) {
   const rule = createPersistentContentRule(
     name,
@@ -488,6 +495,7 @@ async function savePersistentRule(
     content,
     blockMode,
     target,
+    textPath,
   );
   const library = await loadContentRuleLibrary();
   const nextLibrary: ContentRuleLibrary = {
@@ -556,6 +564,7 @@ async function applyTextPreset(
   const textChange = applyTextContentPreservingStructure(
     element,
     preset.content,
+    pendingTextPaths.get(element),
   );
   recordContentHistory({
     label: `Apply ${preset.name}`,
@@ -577,6 +586,7 @@ async function applyTextPreset(
     preset.content,
     'replace',
     preset.name,
+    textChange.textPath,
   );
   return true;
 }

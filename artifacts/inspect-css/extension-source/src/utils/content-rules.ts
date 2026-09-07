@@ -25,6 +25,7 @@ export interface PersistentContentRule {
   blockMode: PersistentBlockMode;
   content: string;
   targetPath?: number[];
+  textPath?: number[];
   enabled: boolean;
   createdAt: number;
   updatedAt: number;
@@ -93,6 +94,12 @@ function normalizeRule(input: unknown): PersistentContentRule | null {
             Number.isInteger(segment) && segment >= 0,
         )
       : [],
+    textPath: Array.isArray(candidate.textPath)
+      ? candidate.textPath.filter(
+          (segment): segment is number =>
+            Number.isInteger(segment) && segment >= 0,
+        )
+      : undefined,
     enabled: candidate.enabled !== false,
     createdAt:
       typeof candidate.createdAt === 'number'
@@ -206,6 +213,7 @@ export function createPersistentContentRule(
   content: string,
   blockMode: PersistentBlockMode = 'replace',
   target: Element = anchor,
+  textPath?: number[] | null,
 ) {
   const timestamp = Date.now();
   return {
@@ -219,6 +227,7 @@ export function createPersistentContentRule(
     blockMode,
     content: mode === 'block' ? sanitizeBlockHTML(content) : content,
     targetPath: getElementPath(anchor, target) ?? [],
+    textPath: textPath ?? undefined,
     enabled: true,
     createdAt: timestamp,
     updatedAt: timestamp,
@@ -259,7 +268,7 @@ function applyRule(rule: PersistentContentRule) {
   }
 
   if (rule.mode === 'text') {
-    applyTextContentPreservingStructure(target, rule.content);
+    applyTextContentPreservingStructure(target, rule.content, rule.textPath);
     return true;
   }
 
