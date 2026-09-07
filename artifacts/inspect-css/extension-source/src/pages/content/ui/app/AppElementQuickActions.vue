@@ -343,6 +343,7 @@ import {
   getSiteKey,
   loadContentRuleLibrary,
   PERSISTENT_RULE_ATTR,
+  PERSISTENT_TEXT_RULE_ATTR,
   saveContentRuleLibrary,
   type ContentRuleLibrary,
   type PersistentContentRule,
@@ -444,7 +445,7 @@ function emitSelected(element: Element) {
   if (element.isConnected) emitter.emit('content:select-element', element);
 }
 
-function duplicateElement() {
+async function duplicateElement() {
   if (!selectedEl.value?.isConnected) {
     showFeedback('Select an element first.');
     return;
@@ -477,14 +478,27 @@ function duplicateElement() {
   });
   refreshHistoryCount();
   emitSelected(targetClone);
-  showFeedback('Element duplicated.');
+  try {
+    await savePersistentRule(
+      scope,
+      scope,
+      clone,
+      'duplicate',
+      '',
+      'insert',
+      'Show original',
+    );
+    showFeedback('Original shown and saved as a persistent rule.');
+  } catch {
+    showFeedback('Original shown, but it could not be saved.');
+  }
 }
 
 async function savePersistentRule(
   anchor: Element,
   target: Element,
   injectedElements: Element | Element[],
-  mode: 'text' | 'block',
+  mode: 'text' | 'block' | 'duplicate',
   content: string,
   blockMode: 'replace' | 'insert',
   name: string,
@@ -520,13 +534,18 @@ async function savePersistentRule(
     ? injectedElements
     : [injectedElements];
   elements.forEach((element) =>
-    element.setAttribute(PERSISTENT_RULE_ATTR, rule.id),
+    element.setAttribute(
+      mode === 'text' ? PERSISTENT_TEXT_RULE_ATTR : PERSISTENT_RULE_ATTR,
+      rule.id,
+    ),
   );
   try {
     await saveContentRuleLibrary(nextLibrary);
   } catch (error) {
     elements.forEach((element) =>
-      element.removeAttribute(PERSISTENT_RULE_ATTR),
+      element.removeAttribute(
+        mode === 'text' ? PERSISTENT_TEXT_RULE_ATTR : PERSISTENT_RULE_ATTR,
+      ),
     );
     throw error;
   }
@@ -585,16 +604,12 @@ async function applyTextPreset(
   });
   refreshHistoryCount();
   emitSelected(textChange.target);
-  const anchor = pendingAnchors.get(textChange.target) ?? pendingAnchors.get(element);
-  if (!anchor?.isConnected) return false;
-  const target =
-    pendingOriginalTargets.get(textChange.target) ??
-    pendingOriginalTargets.get(element) ??
-    anchor;
+  const anchor = element;
+  const target = textChange.target;
   await savePersistentRule(
     anchor,
     target,
-    textChange.target,
+    [anchor, textChange.target],
     'text',
     preset.content,
     'replace',

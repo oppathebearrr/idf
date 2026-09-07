@@ -5,15 +5,22 @@ export const presetRuntime = String.raw`
 
   const STORAGE_KEY = 'content-presets';
   const RULES_STORAGE_KEY = 'content-rules';
+  const RULES_VERSION = 2;
   const SELECTED_ATTR = 'inspect-css-selected';
   const RULE_ATTR = 'data-security-inspection-rule-id';
+  const TEXT_RULE_ATTR = 'data-security-inspection-text-rule-id';
   const MENU_ID = 'inspect-css-preset-menu';
   const HOVER_WARNING_ID = 'inspect-css-hover-warning';
   const OPEN_DETAIL_EVENT = 'security-inspection-open-detail';
   const VERSION = 3;
   let activeElement = null;
   let library = { version: VERSION, presets: [] };
-  let ruleLibrary = { version: 1, enabled: true, siteSettings: {}, rules: [] };
+  let ruleLibrary = {
+    version: RULES_VERSION,
+    enabled: true,
+    siteSettings: {},
+    rules: [],
+  };
   let panel = '';
   let mode = 'text';
   let blockMode = 'replace';
@@ -385,11 +392,16 @@ export const presetRuntime = String.raw`
     Boolean(element.closest('#inspect-css-root')) ||
     element === menu ||
     element === hoverWarning;
-  const elementSelector = (element) => {
+  const elementSelector = (element, allowPersistentAnchor = false) => {
     const segments = [];
     let current = element;
     while (current && current !== document.documentElement) {
-      if (extensionOwned(current)) break;
+      if (
+        current.id === 'inspect-css-root' ||
+        current.closest('#inspect-css-root') !== null ||
+        (!allowPersistentAnchor && current.hasAttribute(RULE_ATTR))
+      )
+        break;
       const tag = current.tagName.toLowerCase();
       const id = current.getAttribute('id');
       if (id && !id.startsWith('inspect-css-')) {
@@ -602,6 +614,8 @@ export const presetRuntime = String.raw`
   };
   const normalizeRuleLibrary = (value) => {
     const input = value && typeof value === 'object' ? value : {};
+    const storedVersion =
+      typeof input.version === 'number' ? input.version : 0;
     const normalizedRules = Array.isArray(input.rules)
       ? input.rules.filter(
           (rule) =>
@@ -612,9 +626,12 @@ export const presetRuntime = String.raw`
             typeof rule.siteKey === 'string' &&
             typeof rule.selector === 'string' &&
             typeof rule.anchorTagName === 'string' &&
-            (rule.mode === 'text' || rule.mode === 'block') &&
+            (rule.mode === 'text' ||
+              rule.mode === 'block' ||
+              rule.mode === 'duplicate') &&
             (rule.blockMode === 'replace' || rule.blockMode === 'insert') &&
-            typeof rule.content === 'string',
+            typeof rule.content === 'string' &&
+            (storedVersion >= RULES_VERSION || rule.mode !== 'text'),
         )
       : [];
     const seenTextTargets = new Set();
@@ -644,7 +661,7 @@ export const presetRuntime = String.raw`
           )
         : {};
     return {
-      version: 1,
+      version: RULES_VERSION,
       enabled: input.enabled !== false,
       siteSettings,
       rules,
@@ -662,7 +679,12 @@ export const presetRuntime = String.raw`
       chrome.storage.local.get([RULES_STORAGE_KEY], (value) => {
         ruleLibrary =
           value[RULES_STORAGE_KEY] === undefined
-            ? { version: 1, enabled: true, siteSettings: {}, rules: [] }
+            ? {
+                version: RULES_VERSION,
+                enabled: true,
+                siteSettings: {},
+                rules: [],
+              }
             : normalizeRuleLibrary(value[RULES_STORAGE_KEY]);
         resolve();
       });
@@ -682,7 +704,7 @@ export const presetRuntime = String.raw`
       name: name.trim() || 'Untitled rule',
       pageKey: rulePageKey(),
       siteKey: ruleSiteKey(),
-      selector: elementSelector(anchor),
+      selector: elementSelector(anchor, modeName === 'text'),
       anchorTagName: anchor.tagName.toLowerCase(),
       mode: modeName,
       blockMode: blockModeName || 'replace',
@@ -727,9 +749,18 @@ export const presetRuntime = String.raw`
     const elements = Array.isArray(injectedElements)
       ? injectedElements
       : [injectedElements];
-    elements.forEach((element) => element.setAttribute(RULE_ATTR, rule.id));
+    elements.forEach((element) =>
+      element.setAttribute(
+        modeName === 'text' ? TEXT_RULE_ATTR : RULE_ATTR,
+        rule.id,
+      ),
+    );
     return persistRules().catch((error) => {
-      elements.forEach((element) => element.removeAttribute(RULE_ATTR));
+      elements.forEach((element) =>
+        element.removeAttribute(
+          modeName === 'text' ? TEXT_RULE_ATTR : RULE_ATTR,
+        ),
+      );
       throw error;
     }).then(() => rule);
   };
@@ -743,18 +774,27 @@ export const presetRuntime = String.raw`
     return (
       candidates.find(
         (element) =>
-          !extensionOwned(element) &&
+          (rule.mode === 'text' || !extensionOwned(element)) &&
           element.tagName.toLowerCase() === rule.anchorTagName,
       ) || null
     );
   };
   const applyPersistentRule = (rule) => {
+    const ruleAttr = rule.mode === 'text' ? TEXT_RULE_ATTR : RULE_ATTR;
     const alreadyInjected = Array.from(
-      document.querySelectorAll('[' + RULE_ATTR + ']'),
-    ).some((element) => element.getAttribute(RULE_ATTR) === rule.id);
+      document.querySelectorAll('[' + ruleAttr + ']'),
+    ).some((element) => element.getAttribute(ruleAttr) === rule.id);
     if (alreadyInjected) return false;
     const anchor = findRuleAnchor(rule);
-    if (!anchor || !anchor.parentElement) return false;
+    if (!anchor) return false;
+    if (rule.mode === 'text') {
+      const target = getElementAtPath(anchor, rule.targetPath || []);
+      if (!target) return false;
+      applyTextContentPreservingStructure(target, rule.content, rule.textPath);
+      anchor.setAttribute(TEXT_RULE_ATTR, rule.id);
+      return true;
+    }
+    if (!anchor.parentElement) return false;
     const clone = uniqueClone(anchor);
     clone.setAttribute(RULE_ATTR, rule.id);
     anchor.parentElement.insertBefore(clone, anchor);
@@ -764,10 +804,7 @@ export const presetRuntime = String.raw`
       clone.remove();
       return false;
     }
-    if (rule.mode === 'text') {
-      applyTextContentPreservingStructure(target, rule.content, rule.textPath);
-      return true;
-    }
+    if (rule.mode === 'duplicate') return true;
     const template = document.createElement('template');
     template.innerHTML = safeHTML(rule.content);
     const replacement = template.content.firstElementChild;
@@ -866,18 +903,11 @@ export const presetRuntime = String.raw`
     record('Apply ' + preset.name, () => {
       textChange.restore();
     });
-    const anchor = pendingAnchors.get(element);
-    if (!anchor || !anchor.isConnected) return say(preset.name + ' applied.');
     const targetElement = textChange.target;
-    const targetAnchor = pendingAnchors.get(targetElement) || anchor;
-    const target =
-      pendingOriginalTargets.get(targetElement) ||
-      pendingOriginalTargets.get(element) ||
-      anchor;
     savePersistentRule(
-      targetAnchor,
-      target,
+      element,
       targetElement,
+      [element, targetElement],
       'text',
       preset.content,
       'replace',
@@ -990,7 +1020,17 @@ export const presetRuntime = String.raw`
     });
     record('Duplicate element', () => clone.remove());
     refreshSelection(targetClone);
-    say('Element duplicated.');
+    savePersistentRule(
+      scope,
+      scope,
+      clone,
+      'duplicate',
+      '',
+      'insert',
+      'Show original',
+    )
+      .then(() => say('Original shown and saved as a persistent rule.'))
+      .catch(() => say('Original shown, but it could not be saved.'));
   };
 
   const managePreset = (preset, action) => {

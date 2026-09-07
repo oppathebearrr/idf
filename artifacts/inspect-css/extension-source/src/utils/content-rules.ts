@@ -8,11 +8,13 @@ import {
   sanitizeBlockHTML,
 } from './content-presets';
 
-export const CONTENT_RULES_VERSION = 1;
+export const CONTENT_RULES_VERSION = 2;
 export const CONTENT_RULES_KEY = 'content-rules';
 export const PERSISTENT_RULE_ATTR = 'data-security-inspection-rule-id';
+export const PERSISTENT_TEXT_RULE_ATTR =
+  'data-security-inspection-text-rule-id';
 
-export type PersistentRuleMode = 'text' | 'block';
+export type PersistentRuleMode = 'text' | 'block' | 'duplicate';
 export type PersistentBlockMode = 'replace' | 'insert';
 
 export interface PersistentContentRule {
@@ -71,7 +73,9 @@ function normalizeRule(input: unknown): PersistentContentRule | null {
     typeof candidate.siteKey !== 'string' ||
     typeof candidate.selector !== 'string' ||
     typeof candidate.anchorTagName !== 'string' ||
-    (candidate.mode !== 'text' && candidate.mode !== 'block') ||
+    (candidate.mode !== 'text' &&
+      candidate.mode !== 'block' &&
+      candidate.mode !== 'duplicate') ||
     (candidate.blockMode !== 'replace' && candidate.blockMode !== 'insert') ||
     typeof candidate.content !== 'string'
   ) {
@@ -117,9 +121,12 @@ function normalizeLibrary(input: unknown): ContentRuleLibrary {
   if (!input || typeof input !== 'object') return emptyLibrary;
 
   const candidate = input as Partial<ContentRuleLibrary>;
+  const storedVersion =
+    typeof candidate.version === 'number' ? candidate.version : 0;
   const normalizedRules = Array.isArray(candidate.rules)
     ? candidate.rules
         .map(normalizeRule)
+        .filter((rule) => storedVersion >= CONTENT_RULES_VERSION || rule.mode !== 'text')
         .filter((rule): rule is PersistentContentRule => Boolean(rule))
     : [];
   const seenTextTargets = new Set<string>();
@@ -190,12 +197,22 @@ function isExtensionOwned(element: Element) {
   );
 }
 
-export function createElementSelector(element: Element) {
+export function createElementSelector(
+  element: Element,
+  allowPersistentAnchor = false,
+) {
   const segments: string[] = [];
   let current: Element | null = element;
 
   while (current && current !== document.documentElement) {
-    if (isExtensionOwned(current)) break;
+    if (
+      current.id === 'inspect-css-root' ||
+      current.closest('#inspect-css-root') !== null ||
+      (!allowPersistentAnchor &&
+        current.hasAttribute(PERSISTENT_RULE_ATTR))
+    ) {
+      break;
+    }
 
     const tagName = current.tagName.toLowerCase();
     const id = current.getAttribute('id');
@@ -239,7 +256,7 @@ export function createPersistentContentRule(
     name: name.trim() || 'Untitled rule',
     pageKey: getPageKey(),
     siteKey: getSiteKey(),
-    selector: createElementSelector(anchor),
+    selector: createElementSelector(anchor, mode === 'text'),
     anchorTagName: anchor.tagName.toLowerCase(),
     mode,
     blockMode,
@@ -256,7 +273,7 @@ function findAnchor(rule: PersistentContentRule) {
   try {
     return [...document.querySelectorAll(rule.selector)].find(
       (element) =>
-        !isExtensionOwned(element) &&
+        (rule.mode === 'text' || !isExtensionOwned(element)) &&
         element.tagName.toLowerCase() === rule.anchorTagName,
     );
   } catch {
@@ -265,30 +282,39 @@ function findAnchor(rule: PersistentContentRule) {
 }
 
 function applyRule(rule: PersistentContentRule) {
+  const ruleAttr =
+    rule.mode === 'text' ? PERSISTENT_TEXT_RULE_ATTR : PERSISTENT_RULE_ATTR;
   if (
     document.querySelector(
-      `[${PERSISTENT_RULE_ATTR}="${escapeIdentifier(rule.id)}"]`,
+      `[${ruleAttr}="${escapeIdentifier(rule.id)}"]`,
     )
   ) {
     return false;
   }
 
   const anchor = findAnchor(rule);
-  if (!anchor?.parentElement) return false;
+  if (!anchor) return false;
+
+  if (rule.mode === 'text') {
+    const target = getElementAtPath(anchor, rule.targetPath ?? []);
+    if (!target) return false;
+    applyTextContentPreservingStructure(target, rule.content, rule.textPath);
+    anchor.setAttribute(PERSISTENT_TEXT_RULE_ATTR, rule.id);
+    return true;
+  }
+
+  if (!anchor.parentElement) return false;
 
   const clone = createUniqueClone(anchor);
   clone.setAttribute(PERSISTENT_RULE_ATTR, rule.id);
   anchor.parentElement.insertBefore(clone, anchor);
   normalizeDuplicatePlacement(clone, anchor);
+  if (rule.mode === 'duplicate') return true;
+
   const target = getElementAtPath(clone, rule.targetPath ?? []);
   if (!target) {
     clone.remove();
     return false;
-  }
-
-  if (rule.mode === 'text') {
-    applyTextContentPreservingStructure(target, rule.content, rule.textPath);
-    return true;
   }
 
   const replacementHTML = sanitizeBlockHTML(rule.content);

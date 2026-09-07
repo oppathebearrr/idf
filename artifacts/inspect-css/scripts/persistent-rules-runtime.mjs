@@ -5,6 +5,8 @@ export const persistentRulesRuntime = String.raw`
 
   const STORAGE_KEY = 'content-rules';
   const RULE_ATTR = 'data-security-inspection-rule-id';
+  const TEXT_RULE_ATTR = 'data-security-inspection-text-rule-id';
+  const RULES_VERSION = 2;
 
   const pageKey = () => window.location.origin + window.location.pathname;
   const siteKey = () => window.location.origin;
@@ -22,7 +24,8 @@ export const persistentRulesRuntime = String.raw`
           name.startsWith('on') ||
           name === 'srcdoc' ||
           name.startsWith('inspect-css-') ||
-          name === RULE_ATTR
+           name === RULE_ATTR ||
+           name === TEXT_RULE_ATTR
         ) {
           node.removeAttribute(attribute.name);
         } else if (
@@ -120,12 +123,23 @@ export const persistentRulesRuntime = String.raw`
       (current, index) => (current ? current.children[index] : null),
       root,
     );
-  const applyTextContentPreservingStructure = (element, content) => {
+  const getTextNodeAtPath = (root, path) => {
+    const target = path.reduce(
+      (current, index) => (current ? current.childNodes[index] : null),
+      root,
+    );
+    return target && target.nodeType === Node.TEXT_NODE ? target : null;
+  };
+  const applyTextContentPreservingStructure = (element, content, textPath) => {
+    const preferredTextNode = Array.isArray(textPath)
+      ? getTextNodeAtPath(element, textPath)
+      : null;
     const directTextNodes = Array.from(element.childNodes).filter(
       (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
     );
-    if (directTextNodes.length) {
-      directTextNodes[0].textContent = content;
+    const textNode = preferredTextNode || directTextNodes[0];
+    if (textNode) {
+      textNode.textContent = content;
       return;
     }
     const textTarget =
@@ -141,6 +155,39 @@ export const persistentRulesRuntime = String.raw`
     element.id === 'inspect-css-root' ||
     element.hasAttribute(RULE_ATTR) ||
     Boolean(element.closest('#inspect-css-root'));
+  const normalizeDuplicatePlacement = (clone, original) => {
+    const cloneRect = clone.getBoundingClientRect();
+    const originalRect = original.getBoundingClientRect();
+    const cloneArea = cloneRect.width * cloneRect.height;
+    const originalArea = originalRect.width * originalRect.height;
+    if (!cloneArea || !originalArea) return;
+    const overlapWidth = Math.max(
+      0,
+      Math.min(cloneRect.right, originalRect.right) -
+        Math.max(cloneRect.left, originalRect.left),
+    );
+    const overlapHeight = Math.max(
+      0,
+      Math.min(cloneRect.bottom, originalRect.bottom) -
+        Math.max(cloneRect.top, originalRect.top),
+    );
+    if (
+      overlapWidth * overlapHeight <
+      Math.min(cloneArea, originalArea) * 0.8
+    ) {
+      return;
+    }
+    clone.style.setProperty('position', 'relative', 'important');
+    clone.style.setProperty('inset', 'auto', 'important');
+    clone.style.setProperty('top', 'auto', 'important');
+    clone.style.setProperty('right', 'auto', 'important');
+    clone.style.setProperty('bottom', 'auto', 'important');
+    clone.style.setProperty('left', 'auto', 'important');
+    clone.style.setProperty('transform', 'none', 'important');
+    clone.style.setProperty('grid-area', 'auto', 'important');
+    clone.style.setProperty('grid-column', 'auto', 'important');
+    clone.style.setProperty('grid-row', 'auto', 'important');
+  };
 
   const findAnchor = (rule) => {
     let candidates = [];
@@ -152,33 +199,39 @@ export const persistentRulesRuntime = String.raw`
     return (
       candidates.find(
         (element) =>
-          !extensionOwned(element) &&
+          (rule.mode === 'text' || !extensionOwned(element)) &&
           element.tagName.toLowerCase() === rule.anchorTagName,
       ) || null
     );
   };
 
   const applyRule = (rule) => {
+    const ruleAttr = rule.mode === 'text' ? TEXT_RULE_ATTR : RULE_ATTR;
     const alreadyInjected = Array.from(
-      document.querySelectorAll('[' + RULE_ATTR + ']'),
-    ).some((element) => element.getAttribute(RULE_ATTR) === rule.id);
+      document.querySelectorAll('[' + ruleAttr + ']'),
+    ).some((element) => element.getAttribute(ruleAttr) === rule.id);
     if (alreadyInjected) return false;
 
     const anchor = findAnchor(rule);
-    if (!anchor || !anchor.parentElement) return false;
+    if (!anchor) return false;
+    if (rule.mode === 'text') {
+      const target = getElementAtPath(anchor, rule.targetPath || []);
+      if (!target) return false;
+      applyTextContentPreservingStructure(target, rule.content, rule.textPath);
+      anchor.setAttribute(TEXT_RULE_ATTR, rule.id);
+      return true;
+    }
+    if (!anchor.parentElement) return false;
 
     const clone = uniqueClone(anchor);
     clone.setAttribute(RULE_ATTR, rule.id);
     anchor.parentElement.insertBefore(clone, anchor);
+    normalizeDuplicatePlacement(clone, anchor);
+    if (rule.mode === 'duplicate') return true;
     const target = getElementAtPath(clone, rule.targetPath || []);
     if (!target) {
       clone.remove();
       return false;
-    }
-
-    if (rule.mode === 'text') {
-      applyTextContentPreservingStructure(target, rule.content);
-      return true;
     }
 
     const template = document.createElement('template');
@@ -200,6 +253,8 @@ export const persistentRulesRuntime = String.raw`
 
   const normalize = (value) => {
     const input = value && typeof value === 'object' ? value : {};
+    const storedVersion =
+      typeof input.version === 'number' ? input.version : 0;
     const rules = Array.isArray(input.rules)
       ? input.rules.filter(
           (rule) =>
@@ -209,9 +264,12 @@ export const persistentRulesRuntime = String.raw`
             typeof rule.siteKey === 'string' &&
             typeof rule.selector === 'string' &&
             typeof rule.anchorTagName === 'string' &&
-            (rule.mode === 'text' || rule.mode === 'block') &&
+            (rule.mode === 'text' ||
+              rule.mode === 'block' ||
+              rule.mode === 'duplicate') &&
             (rule.blockMode === 'replace' || rule.blockMode === 'insert') &&
-            typeof rule.content === 'string',
+            typeof rule.content === 'string' &&
+            (storedVersion >= RULES_VERSION || rule.mode !== 'text'),
         )
       : [];
     const siteSettings =
@@ -224,7 +282,7 @@ export const persistentRulesRuntime = String.raw`
           )
         : {};
     return {
-      version: 1,
+      version: RULES_VERSION,
       enabled: input.enabled !== false,
       siteSettings,
       rules,
