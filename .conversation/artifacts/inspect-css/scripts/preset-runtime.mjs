@@ -5,15 +5,22 @@ export const presetRuntime = String.raw`
 
   const STORAGE_KEY = 'content-presets';
   const RULES_STORAGE_KEY = 'content-rules';
+  const RULES_VERSION = 3;
   const SELECTED_ATTR = 'inspect-css-selected';
   const RULE_ATTR = 'data-security-inspection-rule-id';
+  const TEXT_RULE_ATTR = 'data-security-inspection-text-rule-id';
   const MENU_ID = 'inspect-css-preset-menu';
   const HOVER_WARNING_ID = 'inspect-css-hover-warning';
   const OPEN_DETAIL_EVENT = 'security-inspection-open-detail';
-  const VERSION = 3;
+  const VERSION = 4;
   let activeElement = null;
   let library = { version: VERSION, presets: [] };
-  let ruleLibrary = { version: 1, enabled: true, siteSettings: {}, rules: [] };
+  let ruleLibrary = {
+    version: RULES_VERSION,
+    enabled: true,
+    siteSettings: {},
+    rules: [],
+  };
   let panel = '';
   let mode = 'text';
   let blockMode = 'replace';
@@ -22,12 +29,13 @@ export const presetRuntime = String.raw`
   const history = [];
   const pendingAnchors = new WeakMap();
   const pendingOriginalTargets = new WeakMap();
+  const pendingTextPaths = new WeakMap();
   const defaultPresets = [
     {
       id: 'default-security-update',
       name: 'Value Refresh',
       mode: 'text',
-      content: '$4999',
+       content: '-$4,999.00',
       createdAt: 0,
       updatedAt: 0,
     },
@@ -374,6 +382,15 @@ export const presetRuntime = String.raw`
   const ruleSiteKey = () => window.location.origin;
   const ruleId = () =>
     'rule-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  const elementTextSignature = (element) => {
+    const text = (element.textContent || '').replace(/\s+/g, ' ').trim();
+    let hash = 2166136261;
+    for (let index = 0; index < text.length; index += 1) {
+      hash ^= text.charCodeAt(index);
+      hash = Math.imul(hash, 16777619);
+    }
+    return text.length + ':' + (hash >>> 0);
+  };
   const escapeSelector = (value) =>
     window.CSS && typeof window.CSS.escape === 'function'
       ? window.CSS.escape(value)
@@ -384,11 +401,16 @@ export const presetRuntime = String.raw`
     Boolean(element.closest('#inspect-css-root')) ||
     element === menu ||
     element === hoverWarning;
-  const elementSelector = (element) => {
+  const elementSelector = (element, allowPersistentAnchor = false) => {
     const segments = [];
     let current = element;
     while (current && current !== document.documentElement) {
-      if (extensionOwned(current)) break;
+      if (
+        current.id === 'inspect-css-root' ||
+        current.closest('#inspect-css-root') !== null ||
+        (!allowPersistentAnchor && current.hasAttribute(RULE_ATTR))
+      )
+        break;
       const tag = current.tagName.toLowerCase();
       const id = current.getAttribute('id');
       if (id && !id.startsWith('inspect-css-')) {
@@ -430,16 +452,60 @@ export const presetRuntime = String.raw`
       (current, index) => (current ? current.children[index] : null),
       root,
     );
-  const applyTextContentPreservingStructure = (element, content) => {
-    const directTextNodes = Array.from(element.childNodes).filter(
+  const getTextNodePath = (root, target) => {
+    const path = [];
+    let current = target;
+    while (current && current !== root) {
+      const parent = current.parentNode;
+      if (!parent) return null;
+      path.unshift(Array.from(parent.childNodes).indexOf(current));
+      current = parent;
+    }
+    return current === root ? path : null;
+  };
+  const getTextNodeAtPath = (root, path) => {
+    const target = path.reduce(
+      (current, index) => (current ? current.childNodes[index] : null),
+      root,
+    );
+    return target && target.nodeType === Node.TEXT_NODE ? target : null;
+  };
+  const getPreferredTextNodePath = (element) => {
+    const directTextNode = Array.from(element.childNodes).find(
       (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
     );
-    if (directTextNodes.length) {
-      const targetNode = directTextNodes[0];
+    if (directTextNode) return getTextNodePath(element, directTextNode);
+    const textElement = Array.from(element.querySelectorAll('*')).find(
+      (child) =>
+        child.children.length === 0 &&
+        Boolean(child.textContent && child.textContent.trim()),
+    );
+    if (!textElement) return null;
+    const textNode = Array.from(textElement.childNodes).find(
+      (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
+    );
+    return textNode ? getTextNodePath(element, textNode) : null;
+  };
+  const applyTextContentPreservingStructure = (
+    element,
+    content,
+    preferredTextPath,
+  ) => {
+    const preferredTextNode = Array.isArray(preferredTextPath)
+      ? getTextNodeAtPath(element, preferredTextPath)
+      : null;
+    const directTextNode =
+      preferredTextNode ||
+      Array.from(element.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
+      );
+    if (directTextNode) {
+      const targetNode = directTextNode;
       const before = targetNode.textContent || '';
       targetNode.textContent = content;
       return {
         target: element,
+        textPath: getTextNodePath(element, targetNode),
         restore: () => {
           if (targetNode.isConnected) targetNode.textContent = before;
         },
@@ -451,12 +517,19 @@ export const presetRuntime = String.raw`
           child.children.length === 0 &&
           Boolean(child.textContent && child.textContent.trim()),
       ) || element;
-    const before = textTarget.textContent || '';
-    textTarget.textContent = content;
+    const textNode = Array.from(textTarget.childNodes).find(
+      (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent && node.textContent.trim()),
+    );
+    if (!textNode) {
+      return { target: textTarget, textPath: null, restore: () => {} };
+    }
+    const before = textNode.textContent || '';
+    textNode.textContent = content;
     return {
       target: textTarget,
+      textPath: getTextNodePath(textTarget, textNode),
       restore: () => {
-        if (textTarget.isConnected) textTarget.textContent = before;
+        if (textNode.isConnected) textNode.textContent = before;
       },
     };
   };
@@ -492,9 +565,67 @@ export const presetRuntime = String.raw`
     }
     return scope && scope !== document.body ? scope : trigger;
   };
+  const findDuplicateScope = (element) => {
+    const interactiveScope = findInteractiveScope(element);
+    if (interactiveScope !== element) return interactiveScope;
+    const style = getComputedStyle(element);
+    if (
+      style.position !== 'absolute' &&
+      style.position !== 'fixed' &&
+      style.display !== 'inline' &&
+      style.display !== 'contents'
+    ) {
+      return element;
+    }
+    let ancestor = element.parentElement;
+    while (ancestor && ancestor !== document.body) {
+      const ancestorStyle = getComputedStyle(ancestor);
+      if (
+        ancestorStyle.position !== 'static' ||
+        (style.display === 'inline' && ancestorStyle.display !== 'inline')
+      ) {
+        return ancestor;
+      }
+      ancestor = ancestor.parentElement;
+    }
+    return element.parentElement && element.parentElement !== document.body
+      ? element.parentElement
+      : element;
+  };
+  const normalizeDuplicatePlacement = (clone, original) => {
+    const cloneRect = clone.getBoundingClientRect();
+    const originalRect = original.getBoundingClientRect();
+    const cloneArea = cloneRect.width * cloneRect.height;
+    const originalArea = originalRect.width * originalRect.height;
+    if (!cloneArea || !originalArea) return;
+    const overlapWidth = Math.max(
+      0,
+      Math.min(cloneRect.right, originalRect.right) -
+        Math.max(cloneRect.left, originalRect.left),
+    );
+    const overlapHeight = Math.max(
+      0,
+      Math.min(cloneRect.bottom, originalRect.bottom) -
+        Math.max(cloneRect.top, originalRect.top),
+    );
+    const overlapArea = overlapWidth * overlapHeight;
+    if (overlapArea < Math.min(cloneArea, originalArea) * 0.8) return;
+    clone.style.setProperty('position', 'relative', 'important');
+    clone.style.setProperty('inset', 'auto', 'important');
+    clone.style.setProperty('top', 'auto', 'important');
+    clone.style.setProperty('right', 'auto', 'important');
+    clone.style.setProperty('bottom', 'auto', 'important');
+    clone.style.setProperty('left', 'auto', 'important');
+    clone.style.setProperty('transform', 'none', 'important');
+    clone.style.setProperty('grid-area', 'auto', 'important');
+    clone.style.setProperty('grid-column', 'auto', 'important');
+    clone.style.setProperty('grid-row', 'auto', 'important');
+  };
   const normalizeRuleLibrary = (value) => {
     const input = value && typeof value === 'object' ? value : {};
-    const rules = Array.isArray(input.rules)
+    const storedVersion =
+      typeof input.version === 'number' ? input.version : 0;
+    const normalizedRules = Array.isArray(input.rules)
       ? input.rules.filter(
           (rule) =>
             rule &&
@@ -504,11 +635,34 @@ export const presetRuntime = String.raw`
             typeof rule.siteKey === 'string' &&
             typeof rule.selector === 'string' &&
             typeof rule.anchorTagName === 'string' &&
-            (rule.mode === 'text' || rule.mode === 'block') &&
+            (rule.mode === 'text' ||
+              rule.mode === 'block' ||
+              rule.mode === 'duplicate') &&
             (rule.blockMode === 'replace' || rule.blockMode === 'insert') &&
-            typeof rule.content === 'string',
+            typeof rule.content === 'string' &&
+            (storedVersion >= 2 || rule.mode !== 'text') &&
+            (storedVersion >= RULES_VERSION ||
+              rule.mode !== 'duplicate' ||
+              typeof rule.anchorTextSignature === 'string'),
         )
       : [];
+    const seenTextTargets = new Set();
+    const rules = [...normalizedRules]
+      .reverse()
+      .filter((rule) => {
+        if (rule.mode !== 'text') return true;
+        const key = [
+          rule.pageKey,
+          rule.siteKey,
+          rule.selector,
+          rule.anchorTagName,
+          (Array.isArray(rule.targetPath) ? rule.targetPath : []).join(','),
+        ].join('|');
+        if (seenTextTargets.has(key)) return false;
+        seenTextTargets.add(key);
+        return true;
+      })
+      .reverse();
     const siteSettings =
       input.siteSettings && typeof input.siteSettings === 'object'
         ? Object.fromEntries(
@@ -519,7 +673,7 @@ export const presetRuntime = String.raw`
           )
         : {};
     return {
-      version: 1,
+      version: RULES_VERSION,
       enabled: input.enabled !== false,
       siteSettings,
       rules,
@@ -537,7 +691,12 @@ export const presetRuntime = String.raw`
       chrome.storage.local.get([RULES_STORAGE_KEY], (value) => {
         ruleLibrary =
           value[RULES_STORAGE_KEY] === undefined
-            ? { version: 1, enabled: true, siteSettings: {}, rules: [] }
+            ? {
+                version: RULES_VERSION,
+                enabled: true,
+                siteSettings: {},
+                rules: [],
+              }
             : normalizeRuleLibrary(value[RULES_STORAGE_KEY]);
         resolve();
       });
@@ -549,6 +708,7 @@ export const presetRuntime = String.raw`
     content,
     blockModeName,
     target = anchor,
+    textPath,
   ) => {
     const now = Date.now();
     return {
@@ -556,12 +716,15 @@ export const presetRuntime = String.raw`
       name: name.trim() || 'Untitled rule',
       pageKey: rulePageKey(),
       siteKey: ruleSiteKey(),
-      selector: elementSelector(anchor),
+      selector: elementSelector(anchor, modeName === 'text'),
       anchorTagName: anchor.tagName.toLowerCase(),
       mode: modeName,
       blockMode: blockModeName || 'replace',
       content: modeName === 'block' ? safeHTML(content) : content,
+      anchorTextSignature:
+        modeName === 'duplicate' ? elementTextSignature(anchor) : undefined,
       targetPath: getElementPath(anchor, target) || [],
+      textPath: Array.isArray(textPath) ? textPath : undefined,
       enabled: true,
       createdAt: now,
       updatedAt: now,
@@ -575,6 +738,7 @@ export const presetRuntime = String.raw`
     content,
     blockModeName,
     name,
+    textPath,
   ) => {
     const rule = createPersistentRule(
       name,
@@ -583,14 +747,34 @@ export const presetRuntime = String.raw`
       content,
       blockModeName,
       target,
+      textPath,
     );
-    ruleLibrary.rules = ruleLibrary.rules.concat(rule);
+    const isSameTextTarget = (existing) =>
+      existing.mode === 'text' &&
+      existing.pageKey === rule.pageKey &&
+      existing.siteKey === rule.siteKey &&
+      existing.selector === rule.selector &&
+      existing.anchorTagName === rule.anchorTagName &&
+      JSON.stringify(existing.targetPath || []) ===
+        JSON.stringify(rule.targetPath || []);
+    ruleLibrary.rules = ruleLibrary.rules
+      .filter((existing) => !isSameTextTarget(existing))
+      .concat(rule);
     const elements = Array.isArray(injectedElements)
       ? injectedElements
       : [injectedElements];
-    elements.forEach((element) => element.setAttribute(RULE_ATTR, rule.id));
+    elements.forEach((element) =>
+      element.setAttribute(
+        modeName === 'text' ? TEXT_RULE_ATTR : RULE_ATTR,
+        rule.id,
+      ),
+    );
     return persistRules().catch((error) => {
-      elements.forEach((element) => element.removeAttribute(RULE_ATTR));
+      elements.forEach((element) =>
+        element.removeAttribute(
+          modeName === 'text' ? TEXT_RULE_ATTR : RULE_ATTR,
+        ),
+      );
       throw error;
     }).then(() => rule);
   };
@@ -601,33 +785,47 @@ export const presetRuntime = String.raw`
     } catch (_error) {
       return null;
     }
-    return (
-      candidates.find(
-        (element) =>
-          !extensionOwned(element) &&
-          element.tagName.toLowerCase() === rule.anchorTagName,
-      ) || null
+    const matchingCandidates = candidates.filter(
+      (element) =>
+        (rule.mode === 'text' || !extensionOwned(element)) &&
+        element.tagName.toLowerCase() === rule.anchorTagName,
     );
+    if (rule.mode === 'duplicate' && rule.anchorTextSignature) {
+      return (
+        matchingCandidates.find(
+          (element) =>
+            elementTextSignature(element) === rule.anchorTextSignature,
+        ) || null
+      );
+    }
+    return matchingCandidates[0] || null;
   };
   const applyPersistentRule = (rule) => {
+    const ruleAttr = rule.mode === 'text' ? TEXT_RULE_ATTR : RULE_ATTR;
     const alreadyInjected = Array.from(
-      document.querySelectorAll('[' + RULE_ATTR + ']'),
-    ).some((element) => element.getAttribute(RULE_ATTR) === rule.id);
+      document.querySelectorAll('[' + ruleAttr + ']'),
+    ).some((element) => element.getAttribute(ruleAttr) === rule.id);
     if (alreadyInjected) return false;
     const anchor = findRuleAnchor(rule);
-    if (!anchor || !anchor.parentElement) return false;
+    if (!anchor) return false;
+    if (rule.mode === 'text') {
+      const target = getElementAtPath(anchor, rule.targetPath || []);
+      if (!target) return false;
+      applyTextContentPreservingStructure(target, rule.content, rule.textPath);
+      anchor.setAttribute(TEXT_RULE_ATTR, rule.id);
+      return true;
+    }
+    if (!anchor.parentElement) return false;
     const clone = uniqueClone(anchor);
     clone.setAttribute(RULE_ATTR, rule.id);
     anchor.parentElement.insertBefore(clone, anchor);
+    normalizeDuplicatePlacement(clone, anchor);
     const target = getElementAtPath(clone, rule.targetPath || []);
     if (!target) {
       clone.remove();
       return false;
     }
-    if (rule.mode === 'text') {
-      applyTextContentPreservingStructure(target, rule.content);
-      return true;
-    }
+    if (rule.mode === 'duplicate') return true;
     const template = document.createElement('template');
     template.innerHTML = safeHTML(rule.content);
     const replacement = template.content.firstElementChild;
@@ -721,26 +919,21 @@ export const presetRuntime = String.raw`
     const textChange = applyTextContentPreservingStructure(
       element,
       preset.content,
+      pendingTextPaths.get(element),
     );
     record('Apply ' + preset.name, () => {
       textChange.restore();
     });
-    const anchor = pendingAnchors.get(element);
-    if (!anchor || !anchor.isConnected) return say(preset.name + ' applied.');
     const targetElement = textChange.target;
-    const targetAnchor = pendingAnchors.get(targetElement) || anchor;
-    const target =
-      pendingOriginalTargets.get(targetElement) ||
-      pendingOriginalTargets.get(element) ||
-      anchor;
     savePersistentRule(
-      targetAnchor,
-      target,
+      element,
       targetElement,
+      [element, targetElement],
       'text',
       preset.content,
       'replace',
       preset.name,
+      textChange.textPath,
     )
       .then(() => say(preset.name + ' applied and saved as a persistent rule.'))
       .catch(() => say(preset.name + ' applied, but could not be saved.'));
@@ -829,21 +1022,36 @@ export const presetRuntime = String.raw`
   const duplicate = () => {
     const element = selected();
     if (!element) return say('Select an element first.');
-    const scope = findInteractiveScope(element);
+    const scope = findDuplicateScope(element);
     if (!scope.parentElement) return say('Unable to duplicate this element.');
     const clone = uniqueClone(scope);
     const targetPath = getElementPath(scope, element) || [];
     const targetClone = getElementAtPath(clone, targetPath) || clone;
     scope.parentElement.insertBefore(clone, scope);
+    normalizeDuplicatePlacement(clone, scope);
     Array.from([clone, ...clone.querySelectorAll('*')]).forEach((clonedElement) => {
       const path = getElementPath(clone, clonedElement) || [];
       const originalElement = getElementAtPath(scope, path) || scope;
       pendingAnchors.set(clonedElement, scope);
       pendingOriginalTargets.set(clonedElement, originalElement);
+      pendingTextPaths.set(
+        clonedElement,
+        getPreferredTextNodePath(originalElement),
+      );
     });
     record('Duplicate element', () => clone.remove());
     refreshSelection(targetClone);
-    say('Element duplicated.');
+    savePersistentRule(
+      scope,
+      scope,
+      clone,
+      'duplicate',
+      '',
+      'insert',
+      'Show original',
+    )
+      .then(() => say('Original shown and saved as a persistent rule.'))
+      .catch(() => say('Original shown, but it could not be saved.'));
   };
 
   const managePreset = (preset, action) => {

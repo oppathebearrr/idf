@@ -326,10 +326,12 @@ import {
   createBlockContentPreset,
   createTextContentPreset,
   createUniqueClone,
-  findInteractiveScope,
+  findDuplicateScope,
   getElementAtPath,
   getElementPath,
+  getPreferredTextNodePath,
   loadContentPresetLibrary,
+  normalizeDuplicatePlacement,
   sanitizeBlockHTML,
   saveContentPresetLibrary,
   type ContentPreset,
@@ -341,6 +343,7 @@ import {
   getSiteKey,
   loadContentRuleLibrary,
   PERSISTENT_RULE_ATTR,
+  PERSISTENT_TEXT_RULE_ATTR,
   saveContentRuleLibrary,
   type ContentRuleLibrary,
   type PersistentContentRule,
@@ -381,6 +384,7 @@ const currentSiteRules = computed(() =>
 );
 const pendingAnchors = new WeakMap<Element, Element>();
 const pendingOriginalTargets = new WeakMap<Element, Element>();
+const pendingTextPaths = new WeakMap<Element, number[] | null>();
 let feedbackTimer: ReturnType<typeof setTimeout> | undefined;
 
 const filteredPresets = computed(() =>
@@ -441,14 +445,14 @@ function emitSelected(element: Element) {
   if (element.isConnected) emitter.emit('content:select-element', element);
 }
 
-function duplicateElement() {
+async function duplicateElement() {
   if (!selectedEl.value?.isConnected) {
     showFeedback('Select an element first.');
     return;
   }
 
   const source = selectedEl.value;
-  const scope = findInteractiveScope(source);
+  const scope = findDuplicateScope(source);
   if (!scope.parentElement) {
     showFeedback('Unable to duplicate this element.');
     return;
@@ -457,11 +461,16 @@ function duplicateElement() {
   const targetPath = getElementPath(scope, source) ?? [];
   const targetClone = getElementAtPath(clone, targetPath) ?? clone;
   scope.parentElement.insertBefore(clone, scope);
+  normalizeDuplicatePlacement(clone, scope);
   [clone, ...clone.querySelectorAll('*')].forEach((clonedElement) => {
     const path = getElementPath(clone, clonedElement) ?? [];
     const originalElement = getElementAtPath(scope, path) ?? scope;
     pendingAnchors.set(clonedElement, scope);
     pendingOriginalTargets.set(clonedElement, originalElement);
+    pendingTextPaths.set(
+      clonedElement,
+      getPreferredTextNodePath(originalElement),
+    );
   });
   recordContentHistory({
     label: 'Duplicate element',
@@ -469,17 +478,31 @@ function duplicateElement() {
   });
   refreshHistoryCount();
   emitSelected(targetClone);
-  showFeedback('Element duplicated.');
+  try {
+    await savePersistentRule(
+      scope,
+      scope,
+      clone,
+      'duplicate',
+      '',
+      'insert',
+      'Show original',
+    );
+    showFeedback('Original shown and saved as a persistent rule.');
+  } catch {
+    showFeedback('Original shown, but it could not be saved.');
+  }
 }
 
 async function savePersistentRule(
   anchor: Element,
   target: Element,
   injectedElements: Element | Element[],
-  mode: 'text' | 'block',
+  mode: 'text' | 'block' | 'duplicate',
   content: string,
   blockMode: 'replace' | 'insert',
   name: string,
+  textPath?: number[] | null,
 ) {
   const rule = createPersistentContentRule(
     name,
@@ -488,24 +511,41 @@ async function savePersistentRule(
     content,
     blockMode,
     target,
+    textPath,
   );
   const library = await loadContentRuleLibrary();
+  const isSameTextTarget = (existing: PersistentContentRule) =>
+    existing.mode === 'text' &&
+    existing.pageKey === rule.pageKey &&
+    existing.siteKey === rule.siteKey &&
+    existing.selector === rule.selector &&
+    existing.anchorTagName === rule.anchorTagName &&
+    JSON.stringify(existing.targetPath ?? []) ===
+      JSON.stringify(rule.targetPath ?? []);
   const nextLibrary: ContentRuleLibrary = {
     ...library,
-    rules: [...library.rules, rule],
+    rules: [
+      ...library.rules.filter((existing) => !isSameTextTarget(existing)),
+      rule,
+    ],
   };
 
   const elements = Array.isArray(injectedElements)
     ? injectedElements
     : [injectedElements];
   elements.forEach((element) =>
-    element.setAttribute(PERSISTENT_RULE_ATTR, rule.id),
+    element.setAttribute(
+      mode === 'text' ? PERSISTENT_TEXT_RULE_ATTR : PERSISTENT_RULE_ATTR,
+      rule.id,
+    ),
   );
   try {
     await saveContentRuleLibrary(nextLibrary);
   } catch (error) {
     elements.forEach((element) =>
-      element.removeAttribute(PERSISTENT_RULE_ATTR),
+      element.removeAttribute(
+        mode === 'text' ? PERSISTENT_TEXT_RULE_ATTR : PERSISTENT_RULE_ATTR,
+      ),
     );
     throw error;
   }
@@ -556,6 +596,7 @@ async function applyTextPreset(
   const textChange = applyTextContentPreservingStructure(
     element,
     preset.content,
+    pendingTextPaths.get(element),
   );
   recordContentHistory({
     label: `Apply ${preset.name}`,
@@ -563,20 +604,17 @@ async function applyTextPreset(
   });
   refreshHistoryCount();
   emitSelected(textChange.target);
-  const anchor = pendingAnchors.get(textChange.target) ?? pendingAnchors.get(element);
-  if (!anchor?.isConnected) return false;
-  const target =
-    pendingOriginalTargets.get(textChange.target) ??
-    pendingOriginalTargets.get(element) ??
-    anchor;
+  const anchor = element;
+  const target = textChange.target;
   await savePersistentRule(
     anchor,
     target,
-    textChange.target,
+    [anchor, textChange.target],
     'text',
     preset.content,
     'replace',
     preset.name,
+    textChange.textPath,
   );
   return true;
 }

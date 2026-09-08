@@ -1,0 +1,10 @@
+{
+  "extensionDescription": {
+    "description": "Extension description",
+    "message": "Inspect elements, understand styles, and make precise page improvements"
+  },
+  "extensionName": {
+    "description": "Extension name",
+    "message": "Security Inspector"
+  }
+}

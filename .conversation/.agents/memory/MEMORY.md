@@ -1,3 +1,2 @@
-- [Browser-extension hosting](inspect-css-deployment.md) — Browser-extension repositories need a hosted companion page; publish an upstream release ZIP when the extension toolchain cannot install in the workspace.
-- [Security Inspection package build](security-inspection-package.md) — Hosted builds require explicit PORT and BASE_PATH values; injected UI must wait for the extension shadow root.
-- [Imported artifact registration](imported-artifacts.md) — Register imported artifact metadata before relying on managed preview or publishing controls.
+- [Project handoff imports](project-handoff-imports.md) — after a conversation-to-project move, inspect preserved transition files before assuming the active root contains the imported repository.
+- [Dynamic duplicate anchors](dynamic-duplicate-anchors.md) — generic CSS selectors can retarget persistent duplicates after dynamic page rebuilds; replay needs an anchor identity check.

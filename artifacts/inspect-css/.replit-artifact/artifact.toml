@@ -1,7 +1,7 @@
 kind = "web"
 previewPath = "/"
 title = "Inspect CSS"
-description = "A hosted download page for the Inspect CSS browser extension, with the production extension package built from the original repository."
+description = "A hosted download page for the Inspect CSS browser extension, with a downloadable Chrome package for local installation."
 version = "1.0.0"
 id = "artifacts/inspect-css"
 router = "path"
