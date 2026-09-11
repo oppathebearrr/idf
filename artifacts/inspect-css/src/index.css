@@ -3,6 +3,27 @@
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
 
+@keyframes access-splash-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.access-splash-progress {
+  transform-origin: left;
+  animation: access-splash-progress 2.1s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .access-splash-progress {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

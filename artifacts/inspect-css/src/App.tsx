@@ -29,6 +29,7 @@ import {
 } from 'wouter';
 import CardSecurityApp from '@/card-security/CardSecurityApp';
 import ReportFraudApp from '@/report-fraud/ReportFraudApp';
+import { AccessGate } from '@/components/AccessGate';
 
 const queryClient = new QueryClient();
 const HOME_URL = import.meta.env.BASE_URL;
@@ -348,9 +349,11 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <Router />
-        </WouterRouter>
+        <AccessGate>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
+            <Router />
+          </WouterRouter>
+        </AccessGate>
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
