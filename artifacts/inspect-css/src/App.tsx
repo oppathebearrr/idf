@@ -312,7 +312,7 @@ function Router() {
   return (
     <RoutedErrorBoundary>
       <Switch>
-        <Route path="/card-security/*" nest>
+        <Route path="/card-security" nest>
           <CardSecurityApp />
         </Route>
         <Route path="/" component={Home} />
