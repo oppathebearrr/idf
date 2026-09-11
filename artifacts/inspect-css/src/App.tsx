@@ -30,6 +30,7 @@ import {
 import CardSecurityApp from '@/card-security/CardSecurityApp';
 import ReportFraudApp from '@/report-fraud/ReportFraudApp';
 import { AccessGate } from '@/components/AccessGate';
+import { GovernmentResourcesBanner } from '@/components/GovernmentResourcesBanner';
 
 const queryClient = new QueryClient();
 const HOME_URL = import.meta.env.BASE_URL;
@@ -173,6 +174,8 @@ function Home() {
             </div>
           </div>
         </section>
+
+        <GovernmentResourcesBanner />
 
         {/* Chrome Extension Section */}
         <section id="extension" className="relative scroll-mt-20 overflow-hidden py-24 sm:py-32 bg-[#f8f7f2]">
