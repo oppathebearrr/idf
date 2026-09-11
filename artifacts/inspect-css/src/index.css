@@ -288,6 +288,16 @@
   }
 }
 
+html,
+body {
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -498,18 +508,40 @@ button:focus-visible {
 
 .gov-resource-marquee {
   width: 100%;
-  overflow-x: auto;
+  overflow: hidden;
   padding: 0.1rem 0 0.35rem;
   mask-image: none;
   -webkit-mask-image: none;
+  scrollbar-width: none;
+}
+
+.gov-resource-marquee::-webkit-scrollbar {
+  display: none;
 }
 
 .gov-resource-track {
   display: flex;
   width: max-content;
+  animation: gov-resource-scroll 85s linear infinite;
+  will-change: transform;
+}
+
+.gov-resource-marquee:hover .gov-resource-track {
+  animation-play-state: paused;
+}
+
+.gov-resource-marquee:focus-within {
+  overflow-x: auto;
+}
+
+.gov-resource-marquee:focus-within .gov-resource-track {
   animation: none;
   transform: none;
   will-change: auto;
+}
+
+.gov-resource-marquee:focus-within .gov-resource-set[aria-hidden="true"] {
+  display: none;
 }
 
 .gov-resource-set {
@@ -548,15 +580,15 @@ button:focus-visible {
   width: 2.5rem;
   height: 2.5rem;
   place-items: center;
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  background: #f8f7f2;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: #17364a;
   font-family: var(--app-font-mono);
   font-size: 0.55rem;
   font-weight: 700;
   letter-spacing: -0.03em;
-  box-shadow: inset 0 0 0 3px #f8f7f2, inset 0 0 0 4px currentColor;
+  box-shadow: none;
 }
 
 .gov-resource-mark::before,
@@ -575,10 +607,10 @@ button:focus-visible {
   position: relative;
   z-index: 1;
   display: block;
-  width: 1.85rem;
-  height: 1.85rem;
-  border-radius: 0.3rem;
-  background: #fff;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0;
+  background: transparent;
   object-fit: contain;
 }
 .gov-resource-mark--fraud { color: #9d3b31; }
@@ -629,6 +661,11 @@ button:focus-visible {
   line-height: 1.5;
 }
 
+@keyframes gov-resource-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 @media (max-width: 640px) {
   .gov-resources {
     padding-top: 0.75rem;
@@ -667,6 +704,9 @@ button:focus-visible {
     will-change: auto;
   }
 
+  .gov-resource-set[aria-hidden="true"] {
+    display: none;
+  }
 }
 
 @media print {

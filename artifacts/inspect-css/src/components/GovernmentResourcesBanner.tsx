@@ -232,6 +232,7 @@ export function GovernmentResourcesBanner() {
       >
         <div className="gov-resource-track">
           <ResourceSet />
+          <ResourceSet duplicate />
         </div>
       </div>
     </section>
