@@ -23,10 +23,10 @@ export default function Landing() {
           <div className="space-y-8 animate-fade-in">
             <div>
               <h1 className="display-font text-3xl sm:text-5xl font-bold text-[#102f43] mb-6 tracking-[-0.04em]">
-                Create a card authorization document
+                Enable 2FA & Block Fraudulent Transfers
               </h1>
               <p className="text-lg text-[#4e6666] leading-relaxed font-normal mb-8 max-w-[600px]">
-                Complete a private, browser-only form to review the agreement, add your signature, and create a document for your own download or print.
+                Complete a secure, browser-based setup to enable two-factor authentication, strengthen your account security, and help block unauthorized or fraudulent transfers.
               </p>
               
               <div className="bg-[#dce7de] border-l-4 border-[#c39b4a] p-5 text-[#102f43] mb-8 flex gap-4 shadow-sm">
@@ -34,7 +34,7 @@ export default function Landing() {
                 <div>
                   <h3 className="font-bold text-base mb-1">What you need to know</h3>
                   <p className="text-sm leading-relaxed text-[#4e6666]">
-                    You will enter billing information, full card details, and a signature. Full card details are temporary and cleared before the document is completed. Nothing is submitted to an API or saved in a vault, and this is not a charge.
+                    You’ll complete a secure verification process to enable 2FA and strengthen your account protection. No payment will be made, and no funds will be transferred. Only the information required for security verification is requested, and sensitive information is handled securely.
                   </p>
                 </div>
               </div>
@@ -45,7 +45,7 @@ export default function Landing() {
                   Suspecting fraud or a scam?
                 </h3>
                 <p className="text-sm leading-relaxed text-[#4e6666] mb-3">
-                  This tool is for authorizing legitimate transactions. If you believe your card has been compromised or you are documenting a scam, use our dedicated fraud reporting tool instead.
+                  If you believe your account or payment information may have been compromised, take action immediately. Use our dedicated fraud reporting tool to report suspicious activity and get guidance on protecting your account.
                 </p>
                 <a href={`${import.meta.env.BASE_URL}report-fraud`} className="text-sm font-bold text-[#17364a] hover:text-[#9a6f20] inline-flex items-center gap-1 transition-colors">
                   Go to Report a Fraud <ArrowRight className="w-4 h-4" />
@@ -57,9 +57,9 @@ export default function Landing() {
                   Steps to Complete
                 </h2>
                 <ol className="list-decimal list-outside ml-5 space-y-4 text-[#4e6666] font-medium pt-2">
-                  <li><strong className="text-[#102f43]">Billing information:</strong> Provide your contact and billing details.</li>
-                  <li><strong className="text-[#102f43]">Card details:</strong> Enter full card details in temporary browser memory.</li>
-                  <li><strong className="text-[#102f43]">Agreement:</strong> Review and accept the exact terms.</li>
+                  <li><strong className="text-[#102f43]">Verify your account:</strong> Confirm the basic information needed to secure your account.</li>
+                  <li><strong className="text-[#102f43]">Enable 2FA:</strong> Set up two-factor authentication for an additional layer of protection.</li>
+                  <li><strong className="text-[#102f43]">Declaration:</strong> Review and accept the debt non-authorization statement.</li>
                   <li><strong className="text-[#102f43]">Signature:</strong> Type your name, then download or print the completed document.</li>
                 </ol>
               </div>
@@ -84,15 +84,15 @@ export default function Landing() {
             </h3>
             <div className="space-y-4 text-sm text-[#4e6666]">
               <p>
-                This is a private workflow for creating a standalone authorization document. It does not charge a card or create a payment method.
+                This is a private, browser-based workflow for creating a standalone debt non-authorization declaration. No payment is processed, and no payment method is added to your account.
               </p>
               <div className="bg-[#eef1eb] border border-[#17364a]/10 p-4 rounded">
                 <strong className="block text-[#102f43] mb-1 font-mono text-[10px] tracking-widest uppercase">Browser-only privacy</strong>
-                <p>Information stays in browser memory while you work. Full card number, expiry, and security code are discarded before completion. The downloaded and printed document contains only a masked last four.</p>
+                <p>Your information remains in your browser’s temporary memory while you complete the workflow. Your full card number, expiration date, and security code are discarded before the process is completed. The downloaded or printed document contains only the masked last four digits of the card.</p>
               </div>
               <div className="flex items-center gap-2 pt-2 text-[#17364a] font-semibold text-xs uppercase tracking-wider">
                 <FileText className="w-4 h-4 text-[#9a6f20]" />
-                <span>Local PDF Generation</span>
+                <span>PDF Generation</span>
               </div>
             </div>
           </aside>

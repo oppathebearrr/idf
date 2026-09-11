@@ -96,10 +96,10 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
   const { customer, card, agreement } = authorization;
   const pageOne: Array<{ text: string; size?: number }> = [
     { text: authorization.businessName, size: 18 },
-    { text: "Standalone authorization document", size: 12 },
+    { text: "Debt non-authorization declaration", size: 12 },
     { text: "Not a chargeable payment method", size: 10 },
     { text: "" },
-    { text: "COMPLETED AUTHORIZATION", size: 15 },
+    { text: "COMPLETED DEBT NON-AUTHORIZATION DECLARATION", size: 15 },
     { text: `Reference ID: ${authorization.referenceId}` },
     { text: `Browser completion time: ${browserDateTime(authorization.completedAt)}` },
     { text: "Time is shown from this browser and is not server verified." },
@@ -118,8 +118,8 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
     { text: `Card details: **** ${card.cardLast4}` },
     { text: "Only the card brand and last four digits are included. Full card details are not included." },
     { text: "" },
-    { text: "Agreement and signature", size: 13 },
-    { text: `Agreement version: ${agreement.termsVersion}` },
+    { text: "Declaration and signature", size: 13 },
+    { text: `Declaration version: ${agreement.termsVersion}` },
     { text: "Accepted: Yes" },
     { text: `Typed signature: ${authorization.signatureName}` },
     { text: `Accepted in browser at: ${browserDateTime(agreement.acceptedAt)}` },
@@ -132,8 +132,8 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
   const pages: Array<Array<{ text: string; size?: number }>> = [pageOne];
   for (let index = 0; index < termLines.length; index += pageSize) {
     pages.push([
-      { text: "EXACT AGREEMENT ACCEPTED", size: 15 },
-      { text: `Agreement version: ${agreement.termsVersion}` },
+      { text: "DEBT NON-AUTHORIZATION DECLARATION ACCEPTED", size: 15 },
+      { text: `Declaration version: ${agreement.termsVersion}` },
       { text: "" },
       ...termLines.slice(index, index + pageSize).map((text) => ({ text })),
     ]);
@@ -144,7 +144,7 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
-  anchor.download = `Authorization_${authorization.referenceId}.pdf`;
+  anchor.download = `Debt_Non_Authorization_${authorization.referenceId}.pdf`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();

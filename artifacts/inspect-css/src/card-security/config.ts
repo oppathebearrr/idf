@@ -15,23 +15,29 @@ export const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   privacyUrl: "",
   termsUrl: "",
   refundUrl: "",
-  disclaimer: "This authorization document is a browser-generated document for your records.",
-  termsText: `CARD-ON-FILE AUTHORIZATION DOCUMENT
+  disclaimer: "This debt non-authorization declaration is a browser-generated document for your records.",
+  termsText: `DEBT NON-AUTHORIZATION DECLARATION
 
-I authorize Security Inspection to record this permission for purchases, products, services, fees, and other amounts that I authorize or incur with Security Inspection.
+I declare that I did not authorize, initiate, or incur the debt, purchase, transaction, or payment described in this document.
 
-This document records my permission for the described authorized purchases. It does not collect or store my full card number, security code, or expiration date, and it does not process, save, or attach a chargeable payment method. The business must handle any purchase separately.
+This document is provided as a record of my statement that the alleged debt is not an obligation that I knowingly authorized or incurred. It is intended to serve as supporting documentation when communicating with a creditor, debt collector, financial institution, or other relevant party regarding the disputed debt.
 
-I understand that individual purchases may vary in amount and may occur at the time of purchase, delivery, completion of services, or as otherwise agreed between me and Security Inspection.
+The card associated with the disputed activity is identified only by its card brand and last four digits. This document does not contain or retain my full card number, security code, or expiration date, and it does not create or authorize any payment, charge, or payment method.
 
-I confirm that I am the cardholder or an authorized user of the card identified only by its brand and last four digits, and that I have authority to provide this permission.
+I request that the disputed debt or transaction be reviewed using the appropriate records and verification procedures. I reserve the right to provide additional information or documentation supporting my dispute.
 
-I understand that this permission will remain in effect until I revoke it in writing or until Security Inspection determines that it is no longer applicable. Revocation will not affect purchases that were authorized or incurred before the revocation became effective.
+I understand that this declaration records my position regarding the disputed debt and does not, by itself, determine the legal validity of the debt or the outcome of any investigation or dispute.
 
-I agree to notify Security Inspection if my card information changes or if I no longer have authorization to use this permission.
+By checking the box below and providing my electronic signature, I confirm that I have read this declaration and that the statements above are true and accurate to the best of my knowledge.
 
-By checking the box below and providing my electronic signature, I acknowledge that I have read and agree to this Card-on-File Authorization Document.
+Electronic Signature: __________________________
 
-I authorize Security Inspection to record my permission for the authorized purchases and services described above.`,
-  termsVersion: "v2-browser-document",
+Date: __________________________
+
+Disputed Account/Reference: __________________________
+
+Card Brand: __________________________
+
+Last Four Digits: __________________________`,
+  termsVersion: "v3-debt-non-authorization",
 };

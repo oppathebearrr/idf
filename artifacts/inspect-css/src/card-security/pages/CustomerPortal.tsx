@@ -52,7 +52,7 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 const STEPS = [
   { id: 1, name: "Information" },
   { id: 2, name: "Card details" },
-  { id: 3, name: "Agreement" },
+  { id: 3, name: "Declaration" },
   { id: 4, name: "Signature" },
 ];
 
@@ -87,8 +87,8 @@ export default function CustomerPortal() {
     }
     if (!agreementIsCurrent || !acceptedAgreement) {
       toast({
-        title: "Agreement required",
-        description: "Review and accept the exact agreement before signing.",
+        title: "Declaration required",
+        description: "Review and accept the debt non-authorization declaration before signing.",
         variant: "destructive",
       });
       setStep(3);
@@ -125,7 +125,7 @@ export default function CustomerPortal() {
         <div className="mb-8 border-b-2 border-[#17364a]/15 pb-6 animate-fade-in">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-[#17364a]xl font-bold text-[#102f43]">Client authorization document</h1>
+              <h1 className="text-xl font-bold text-[#102f43]">Debt non-authorization declaration</h1>
               <p className="text-sm text-[#4e6666] mt-1">
                 Complete the form in this browser, then download or print your document.
               </p>
@@ -297,7 +297,7 @@ function StepOne({
             <FormField control={form.control} name="personalStatement" render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-lg font-bold text-[#102f43]">Personal statement (optional)</FormLabel>
-                <p id="statement-help" className="text-sm text-[#4e6666]">Write a short statement to include with your authorization. Do not include card numbers or security codes.</p>
+                <p id="statement-help" className="text-sm text-[#4e6666]">Write a short statement describing the disputed debt or transaction. Do not include card numbers or security codes.</p>
                 <FormControl>
                   <textarea 
                     {...field} 
@@ -512,7 +512,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
     <form autoComplete="off" onSubmit={validateAndContinue}>
       <StepHeader
         title="2. Card details"
-        description="Enter the card details needed to identify this authorization document."
+        description="Enter the card details needed to identify the disputed activity in this declaration."
       />
       <div className="p-6 sm:p-8 space-y-6">
         <div className="bg-[#dce7de] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3">
@@ -520,7 +520,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
           <div>
             <strong className="font-bold block mb-1">Private browser entry</strong>
             <p className="text-sm leading-relaxed">
-              Full card details stay only in this step&apos;s temporary browser memory. They are cleared when you continue or leave this step, and are never submitted, stored, or included in the document.
+              Full card details remain only in your browser’s temporary memory during this step. They are automatically cleared when you continue or leave this step. Your full card information is never submitted to a server, stored, or included in the generated document.
             </p>
           </div>
         </div>
@@ -622,7 +622,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
         </div>
         <p className="text-xs text-[#4e6666] flex items-start gap-2">
           <CreditCard className="h-4 w-4 shrink-0 mt-0.5" />
-          This is a standalone authorization document, not a charge or a saved payment method.
+          This is a standalone debt non-authorization declaration, not a charge or a saved payment method.
         </p>
       </div>
       <StepActions>
@@ -654,7 +654,7 @@ function StepThree({
 
   const handleNext = () => {
     if (!accepted) {
-      setError("Read and accept the exact agreement before continuing.");
+      setError("Read and accept the debt non-authorization declaration before continuing.");
       return;
     }
     setError("");
@@ -664,14 +664,14 @@ function StepThree({
   return (
     <div>
       <StepHeader
-        title="3. Review and accept the agreement"
-        description="The exact accepted text is included in your browser-generated document."
+        title="3. Review the debt non-authorization declaration"
+        description="The exact declaration you accept is included in your browser-generated document."
       />
       <div className="p-6 sm:p-8 space-y-6">
         <div className="border-2 border-[#17364a]/25 rounded bg-[#f8f7f2] overflow-hidden">
           <div className="bg-[#eef1eb] border-b-2 border-[#17364a]/25 px-4 py-2 flex items-center justify-between">
             <span className="font-bold text-[#102f43] flex items-center gap-2 text-sm">
-              <FileText className="w-4 h-4 text-[#17364a]" /> Exact agreement
+              <FileText className="w-4 h-4 text-[#17364a]" /> Debt non-authorization declaration
             </span>
             <span className="text-xs font-bold uppercase text-[#4e6666] bg-[#f8f7f2] px-2 py-0.5 border border-[#17364a]/15 rounded">
               Version {config.termsVersion}
@@ -690,13 +690,13 @@ function StepThree({
                 if (checked) setError("");
               }}
               className={`mt-1 w-5 h-5 border-2 ${error ? 'border-[#b84635]' : 'border-[#c39b4a]'} data-[state=checked]:bg-[#17364a]`}
-              aria-label="Accept exact agreement"
+              aria-label="Accept debt non-authorization declaration"
               aria-invalid={!!error}
               aria-describedby={error ? "err-agreement" : undefined}
             />
             <div className="text-sm text-[#102f43] font-medium leading-relaxed">
-              <strong className="block mb-1 text-base">I have read and accept this exact agreement</strong>
-              I understand this browser-generated document records my acknowledgement and typed signature. It is not a payment or server-submitted record.
+              <strong className="block mb-1 text-base">I have read and accept this declaration</strong>
+              I confirm that the declaration is true and accurate to the best of my knowledge. I understand that it does not authorize a payment or determine the outcome of a dispute.
             </div>
           </label>
           <FieldError error={error} id="err-agreement" />
@@ -752,7 +752,7 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => v
         <div className="bg-[#f8f7f2] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3 mb-8">
           <Info className="w-5 h-5 text-[#9a6f20] shrink-0 mt-0.5" />
           <p className="text-sm font-medium leading-relaxed">
-            By typing your name below, you are signing this document electronically. The completed document is generated locally; no signature is transmitted or stored on a server.
+            By typing your name below, you acknowledge that you are providing an electronic signature for this document. The completed document is generated locally in your browser, and your signature is not transmitted to or stored on a server.
           </p>
         </div>
         <div className="max-w-md space-y-4">

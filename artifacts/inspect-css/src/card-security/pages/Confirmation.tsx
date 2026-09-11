@@ -9,7 +9,7 @@ export default function Confirmation() {
   const { completed, clear } = useAuthorizationSession();
 
   useEffect(() => {
-    document.title = completed ? "Completed authorization document" : "Authorization session ended";
+    document.title = completed ? "Completed debt non-authorization declaration" : "Declaration session ended";
   }, [completed]);
 
   const startNew = () => {
@@ -53,7 +53,7 @@ export default function Confirmation() {
             <CheckCircle className="w-6 h-6 text-green-600" />
             <span className="text-green-700">Document complete</span>
           </div>
-          <h1 className="text-3xl font-bold text-[#102f43] mb-2">Your authorization document is ready</h1>
+          <h1 className="text-3xl font-bold text-[#102f43] mb-2">Your debt non-authorization declaration is ready</h1>
           <p className="text-lg text-[#4e6666] font-medium">
             Download the PDF or print it now. Keep a copy for your records.
           </p>
@@ -62,7 +62,7 @@ export default function Confirmation() {
         <article id="print-document" className="bg-[#f8f7f2] border-2 border-[#17364a]/25 rounded shadow-sm print:border-0 print:shadow-none">
           <div className="border-b-2 border-[#17364a]/25 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <span className="font-bold text-[#102f43] flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#17364a] print:hidden" /> Completed authorization document
+              <FileText className="w-5 h-5 text-[#17364a] print:hidden" /> Completed debt non-authorization declaration
             </span>
             <div className="flex items-center gap-2 text-sm bg-[#f4f3ee] px-3 py-1.5 border border-[#17364a]/15 rounded">
               <span className="font-bold text-[#4e6666] uppercase tracking-widest text-xs">Local reference</span>
@@ -76,7 +76,7 @@ export default function Confirmation() {
               <div>
                 <strong className="font-bold block mb-1">Keep this document</strong>
                 <p className="text-sm font-medium leading-relaxed">
-                  This is a standalone authorization document, not a chargeable payment method. The PDF and printout contain only masked card details. Nothing was sent to a server, saved to a vault, or emailed.
+                  This is a standalone debt non-authorization declaration, not a chargeable payment method. The PDF and printout contain only masked card details. Nothing was sent to a server, saved to a vault, or emailed.
                 </p>
               </div>
             </div>
@@ -114,15 +114,15 @@ export default function Confirmation() {
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-[#102f43] border-b border-[#17364a]/15 pb-2 mb-4">Agreement and signature</h2>
+              <h2 className="text-lg font-bold text-[#102f43] border-b border-[#17364a]/15 pb-2 mb-4">Declaration and signature</h2>
               <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm mb-5">
-                <SummaryField label="Agreement version" value={completed.agreement.termsVersion} />
+                <SummaryField label="Declaration version" value={completed.agreement.termsVersion} />
                 <SummaryField label="Accepted" value="Yes" />
                 <SummaryField label="Typed signature" value={completed.signatureName} />
                 <SummaryField label="Browser time (not server verified)" value={browserDateTime(completed.completedAt)} />
               </dl>
               <div className="border border-[#17364a]/15 rounded bg-[#f4f3ee] p-5">
-                <h3 className="font-bold text-[#102f43] mb-3">Exact agreement accepted</h3>
+                <h3 className="font-bold text-[#102f43] mb-3">Debt non-authorization declaration accepted</h3>
                 <p className="text-sm text-[#102f43] leading-relaxed whitespace-pre-wrap">{completed.agreement.termsText}</p>
               </div>
             </section>
