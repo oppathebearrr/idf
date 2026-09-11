@@ -232,16 +232,16 @@ export function AccessGate({ children }: AccessGateProps) {
               </div>
             </div>
 
-            <div className="grid h-14 w-14 place-items-center border border-[#c39b4a]/60 bg-[#e2eadf] text-[#17364a]">
-              <Icon3D name="lock-keyhole" size={26} />
+            <div className="grid h-14 w-14 place-ie2eadf] text-[#17364a]">
+              
             </div>
             <p className="mono-label mt-7 text-[#9a6f20]">Identity verification</p>
             <h2 className="display-font mt-3 text-3xl font-bold tracking-[-0.04em] sm:text-4xl">
               Unlock this website
             </h2>
             <p className="mt-4 leading-7 text-[#4e6666]">
-              Enter your exact agent name and employee ID to access the landing
-              page.
+              Enter your assigned agent name and employee ID to access the access
+              the security application.
             </p>
 
             <form className="mt-9 space-y-6" onSubmit={handleSubmit}>
