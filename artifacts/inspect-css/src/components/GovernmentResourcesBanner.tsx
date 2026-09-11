@@ -213,13 +213,13 @@ export function GovernmentResourcesBanner() {
     <section className="gov-resources" aria-labelledby="government-resources-title">
       <div className="inspect-container">
         <div className="gov-resources-heading">
-          <div className="flex items-start gap-4">
+          <div className="flex items-center justify-center gap-3 text-center">
             <span className="gov-resources-heading-icon" aria-hidden="true">
               <Landmark size={22} />
             </span>
             <div>
               <h2 id="government-resources-title" className="display-font text-xl font-bold tracking-[-.04em] text-[#102f43] sm:text-2xl">
-                Official Partnership with Trusted federal resources
+                Official Partnership with Trusted Federal Resources
               </h2>
             </div>
           </div>

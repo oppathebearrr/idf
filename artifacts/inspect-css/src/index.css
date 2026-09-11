@@ -488,10 +488,11 @@ button:focus-visible {
 
 .gov-resources-heading {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: center;
   gap: 2rem;
   margin-bottom: 0.7rem;
+  text-align: center;
 }
 
 .gov-resources-heading-icon {
