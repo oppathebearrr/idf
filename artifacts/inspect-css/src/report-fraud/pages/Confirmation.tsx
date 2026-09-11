@@ -143,7 +143,7 @@ export default function Confirmation() {
               <h2 className="display-font text-2xl font-bold text-[#102f43] mb-3">Urgent: Dispute Unauthorized Transactions</h2>
               <div className="bg-[#f8f7f2] border-l-4 border-[#b84635] p-4 mb-6">
                 <p className="text-sm text-[#102f43] font-medium leading-relaxed">
-                  <strong>Important:</strong> Report unauthorized transaction <em>activate 2FA</em> required to report fraud. Your incident summary is already complete and available for submission such as the FTC or local law enforcement, when applicable. 
+                  <strong>Important:</strong> Report unauthorized transaction <em>activate 2FA</em> required to report fraud. Your incident summary is already complete and available for submission such as the FTC or local law enforcement, when applicable.
                 Continue to this step separately to dispute and hold/freeze unauthorized transcation.
                 </p>
               </div>
@@ -155,7 +155,7 @@ export default function Confirmation() {
                   href={`${import.meta.env.BASE_URL}card-security`}
                   className="flex-1 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 rounded-md shadow-[5px_5px_0_#c39b4a] flex items-center justify-center transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a] text-center text-xs sm:text-sm"
                 >
-                  Activate Card 2FA Security 
+                  Activate Card 2FA Security
                 </a>
                 <Button
                   onClick={startNew}

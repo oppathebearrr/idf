@@ -1,0 +1,201 @@
+<div class="gov-marquee" aria-label="Official government resources">
+  <div class="gov-track">
+
+    <!-- Set 1 -->
+    <div class="gov-item">
+      <span class="gov-icon">FTC</span>
+      <span>ReportFraud.gov</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">ID</span>
+      <span>IdentityTheft.gov</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">FBI</span>
+      <span>IC3</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">USA</span>
+      <span>USA.gov</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">CFPB</span>
+      <span>Consumer Financial Protection Bureau</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">FDIC</span>
+      <span>FDIC</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">OCC</span>
+      <span>OCC</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">DOJ</span>
+      <span>U.S. Department of Justice</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">USSS</span>
+      <span>U.S. Secret Service</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">SSA</span>
+      <span>Social Security Administration</span>
+    </div>
+
+
+    <!-- Duplicate set for seamless infinite loop -->
+    <div class="gov-item">
+      <span class="gov-icon">FTC</span>
+      <span>ReportFraud.gov</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">ID</span>
+      <span>IdentityTheft.gov</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">FBI</span>
+      <span>IC3</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">USA</span>
+      <span>USA.gov</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">CFPB</span>
+      <span>Consumer Financial Protection Bureau</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">FDIC</span>
+      <span>FDIC</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">OCC</span>
+      <span>OCC</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">DOJ</span>
+      <span>U.S. Department of Justice</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">USSS</span>
+      <span>U.S. Secret Service</span>
+    </div>
+
+    <div class="gov-item">
+      <span class="gov-icon">SSA</span>
+      <span>Social Security Administration</span>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.gov-marquee {
+  width: 100%;
+  height: 58px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+
+  /* Fade edges */
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 5%,
+    black 95%,
+    transparent
+  );
+}
+
+.gov-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: gov-scroll 42s linear infinite;
+  will-change: transform;
+}
+
+.gov-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-right: 42px;
+  white-space: nowrap;
+
+  color: #475569;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.gov-icon {
+  width: 30px;
+  height: 30px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 50%;
+
+  background: #ffffff;
+  color: #334155;
+
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .2px;
+}
+
+@keyframes gov-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Pause when user hovers */
+.gov-marquee:hover .gov-track {
+  animation-play-state: paused;
+}
+
+/* Respect accessibility settings */
+@media (prefers-reduced-motion: reduce) {
+  .gov-track {
+    animation: none;
+  }
+}
+</style>
