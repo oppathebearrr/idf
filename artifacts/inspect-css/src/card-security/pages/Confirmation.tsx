@@ -40,7 +40,7 @@ export default function Confirmation() {
     .split("\n")
     .filter(
       (line) =>
-        !/^(Electronic Signature|Date|Disputed Account\/Reference|Card Brand|Last Four Digits):/.test(
+        !/^(Electronic Signature|Date|Disputed Company\/Transaction|Card Brand|Last Four Digits):/.test(
           line.trim(),
         ),
     )
@@ -145,7 +145,7 @@ export default function Confirmation() {
                 <dl className="mt-6 grid gap-x-8 gap-y-4 border-t border-[#17364a]/15 pt-5 sm:grid-cols-2">
                   <SummaryField label="Electronic Signature" value={completed.signatureName} />
                   <SummaryField label="Date" value={browserDateOnly(completed.completedAt)} />
-                  <SummaryField label="Disputed Account/Reference" value={completed.disputedAccountReference} />
+                  <SummaryField label="Disputed Company/Transaction" value={completed.disputedAccountReference} />
                   <SummaryField label="Card Brand" value={displayedCardBrand} />
                   <SummaryField label="Last Four Digits" value={completed.card.cardLast4} />
                 </dl>
@@ -153,7 +153,7 @@ export default function Confirmation() {
             </section>
 
             <section>
-              <h2 className="text-lg font-bold text-[#102f43] border-b border-[#17364a]/15 pb-2 mb-4">BIN lookup information</h2>
+              <h2 className="text-lg font-bold text-[#102f43] border-b border-[#17364a]/15 pb-2 mb-4">Compromised card information</h2>
               {completed.binLookup.status === "available" ? (
                 <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
                   <SummaryField label="Card scheme" value={completed.binLookup.scheme || completed.card.cardBrand} />
@@ -179,9 +179,6 @@ export default function Confirmation() {
               </p>
             </section>
 
-            <p className="text-xs text-[#4e6666] border-t border-[#17364a]/15 pt-4">
-              This document was generated locally by your browser. The reference is random and does not indicate server registration, verification, or storage.
-            </p>
           </div>
         </article>
 

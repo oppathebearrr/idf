@@ -143,8 +143,8 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
     )
     .replace(/^Date:.*$/m, `Date: ${browserDateOnly(authorization.completedAt)}`)
     .replace(
-      /^Disputed Account\/Reference:.*$/m,
-      `Disputed Account/Reference: ${authorization.disputedAccountReference}`,
+      /^Disputed Company\/Transaction:.*$/m,
+      `Disputed Company/Transaction: ${authorization.disputedAccountReference}`,
     )
     .replace(
       /^Card Brand:.*$/m,
@@ -164,7 +164,7 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
   }
 
   const binLookupLines: Array<{ text: string; size?: number }> = [
-    { text: "BIN LOOKUP INFORMATION", size: 15 },
+    { text: "COMPROMISED CARD INFORMATION", size: 15 },
     { text: "Lookup performed using only the first six card digits." },
     { text: "The full card number was not transmitted." },
     { text: "" },
