@@ -109,9 +109,9 @@ export default function CustomerPortal() {
       <div className="inspect-container py-12 flex-1">
         {/* Breadcrumbs */}
         <nav className="text-sm font-medium text-[#4e6666] mb-8 flex items-center gap-2">
-          <Link href="/" className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</Link>
+          <a href={import.meta.env.BASE_URL} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</a>
           <span className="text-[#17364a]/30">›</span>
-          <button onClick={() => setLocation("/")} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Card Security</button>
+          <a href={`${import.meta.env.BASE_URL}card-security`} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Card Security</a>
           <span className="text-[#17364a]/30">›</span>
           <span className="text-[#17364a]">Create Document</span>
         </nav>

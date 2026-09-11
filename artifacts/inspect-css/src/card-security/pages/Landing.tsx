@@ -15,7 +15,7 @@ export default function Landing() {
         
         {/* Breadcrumb equivalent */}
         <nav className="text-sm font-medium text-[#4e6666] mb-8 flex items-center gap-2">
-          <Link href="/" className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</Link>
+          <a href={import.meta.env.BASE_URL} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</a>
           <span className="text-[#17364a]/30">›</span>
           <span className="text-[#17364a]">Card Security</span>
         </nav>

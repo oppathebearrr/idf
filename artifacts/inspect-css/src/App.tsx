@@ -29,7 +29,8 @@ import {
 import CardSecurityApp from '@/card-security/CardSecurityApp';
 
 const queryClient = new QueryClient();
-const DOWNLOAD_URL = '/downloads/SecurityInspectv1.zip?patched=3';
+const HOME_URL = import.meta.env.BASE_URL;
+const DOWNLOAD_URL = `${HOME_URL}downloads/SecurityInspectv1.zip?patched=3`;
 
 function Home() {
   const [downloadState, setDownloadState] = useState<'idle' | 'checking' | 'missing'>('idle');
@@ -42,7 +43,13 @@ function Home() {
         setDownloadState('missing');
         return;
       }
-      window.location.href = DOWNLOAD_URL;
+      const downloadLink = document.createElement('a');
+      downloadLink.href = DOWNLOAD_URL;
+      downloadLink.download = 'SecurityInspectv1.zip';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      setDownloadState('idle');
     } catch {
       setDownloadState('missing');
     }
@@ -64,10 +71,10 @@ function Home() {
       </div>
       <header className="relative z-20 border-b border-[#17364a]/15 bg-[#f4f3ee]/95 backdrop-blur-md sticky top-0">
         <div className="inspect-container flex min-h-[82px] items-center justify-between gap-6">
-          <a href="/" className="outline-focus flex items-center gap-3" data-testid="link-home">
+          <a href={HOME_URL} className="outline-focus flex items-center gap-3" data-testid="link-home">
             <span className="brand-mark grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-[#c39b4a] bg-[#f4f3ee]">
               <img
-                src="/security-inspection-seal.png"
+                src={`${HOME_URL}security-inspection-seal.png`}
                 alt=""
                 className="h-full w-full object-contain"
                 aria-hidden="true"
@@ -92,7 +99,7 @@ function Home() {
         {/* Hero Section */}
         <section className="relative isolate overflow-hidden border-b border-[#17364a]/15 py-16 sm:py-24 lg:py-32 bg-gradient-to-b from-[#f8f7f2] to-[#f4f3ee]">
           <div className="gov-grid pointer-events-none absolute inset-0 -z-10 opacity-70" />
-          <img src="/security-inspection-seal.png" alt="" className="seal-watermark pointer-events-none absolute -right-44 top-10 -z-10 w-[560px] opacity-[0.05] lg:right-[-90px] lg:top-[-80px] lg:w-[700px]" aria-hidden="true" />
+          <img src={`${HOME_URL}security-inspection-seal.png`} alt="" className="seal-watermark pointer-events-none absolute -right-44 top-10 -z-10 w-[560px] opacity-[0.05] lg:right-[-90px] lg:top-[-80px] lg:w-[700px]" aria-hidden="true" />
           
           <div className="inspect-container relative flex flex-col items-center text-center">
             <div className="hero-reveal gov-kicker mb-7 inline-flex items-center gap-2">
@@ -296,7 +303,7 @@ function Home() {
           <div className="inspect-container flex flex-col justify-between gap-5 text-sm text-[#4e6666] sm:flex-row sm:items-center">
               <div className="flex items-center gap-3">
                 <span className="brand-mark grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-[#c39b4a] bg-[#f8f7f2]">
-                  <img src="/security-inspection-seal.png" alt="" className="h-full w-full object-contain" aria-hidden="true" />
+                  <img src={`${HOME_URL}security-inspection-seal.png`} alt="" className="h-full w-full object-contain" aria-hidden="true" />
                 </span>
                 <span>Security Inspection is a public-service initiative for a more accountable, safer web.</span>
             </div>

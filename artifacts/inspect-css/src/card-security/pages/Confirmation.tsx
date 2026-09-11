@@ -1,14 +1,11 @@
 import { useEffect } from "react";
-import { useAppLocation } from "@/card-security/lib/router";
 import { AlertTriangle, CheckCircle, Download, FileText, Info, Printer, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { browserDateTime, downloadAuthorizationPdf } from "@/card-security/lib/browser-document";
 import { useAuthorizationSession } from "@/card-security/lib/authorization-session";
 import { SharedLayout } from "../components/Layout";
-import { Link } from "wouter";
 
 export default function Confirmation() {
-  const [, setLocation] = useAppLocation();
   const { completed, clear } = useAuthorizationSession();
 
   useEffect(() => {
@@ -17,7 +14,7 @@ export default function Confirmation() {
 
   const startNew = () => {
     clear();
-    setLocation("/");
+    window.location.href = `${import.meta.env.BASE_URL}card-security`;
   };
 
   if (!completed) {
@@ -44,9 +41,9 @@ export default function Confirmation() {
       <div className="inspect-container py-12 flex-1 relative z-10">
         {/* Breadcrumbs */}
         <nav className="text-sm font-medium text-[#4e6666] mb-8 flex items-center gap-2 no-print">
-          <Link href="/" className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</Link>
+          <a href={import.meta.env.BASE_URL} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</a>
           <span className="text-[#17364a]/30">›</span>
-          <button onClick={() => setLocation("/")} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Card Security</button>
+          <a href={`${import.meta.env.BASE_URL}card-security`} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Card Security</a>
           <span className="text-[#17364a]/30">›</span>
           <span className="text-[#17364a]">Create Document</span>
         </nav>
