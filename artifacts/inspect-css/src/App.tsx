@@ -74,8 +74,8 @@ function Home() {
               />
             </span>
             <span>
-              <span className="display-font block text-lg font-bold tracking-[-0.04em] text-[#102f43]">Security Inspection</span>
-              <span className="mono-label block text-[9px] text-[#5f726f]">Cybersecurity Public Service</span>
+              <span className="display-font block text-lg font-bold tracking-[-0.04em] text-[#102f43]">Cyber Safety</span>
+              <span className="mono-label block text-[9px] text-[#5f726f]">Secure America Online</span>
             </span>
           </a>
           <nav className="hidden items-center gap-7 text-sm font-semibold text-[#17364a] md:flex" aria-label="Main navigation">
