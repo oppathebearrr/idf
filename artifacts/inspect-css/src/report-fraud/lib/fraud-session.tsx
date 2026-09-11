@@ -18,6 +18,12 @@ export type FinancialInfo = {
   affectedAccounts: string;
 };
 
+export function formatAmountLost(value: string, fallback: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return fallback;
+  return trimmed.startsWith("$") ? trimmed : `$${trimmed}`;
+}
+
 export type EvidenceInfo = {
   hasScreenshots: boolean;
   hasEmails: boolean;

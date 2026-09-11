@@ -305,7 +305,7 @@ This file controls `/report-fraud/confirmation`, including:
 - FBI IC3 link
 - Official filing instructions
 - “Urgent: Card Authorization” handoff
-- Link to `/card-security/authorize`
+- Link to `/card-security`
 - Finish Report Only / Return option
 - Session-ended state
 

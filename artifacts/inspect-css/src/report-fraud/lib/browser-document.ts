@@ -1,4 +1,4 @@
-import type { FraudReportCompleted } from "./fraud-session";
+import { formatAmountLost, type FraudReportCompleted } from "./fraud-session";
 
 function safePdfText(value: string) {
   return value
@@ -109,7 +109,7 @@ export function downloadFraudReportPdf(report: FraudReportCompleted) {
     { text: `Method of contact: ${incident.contactChannel}` },
     { text: "" },
     { text: "Financial impact", size: 13 },
-    { text: `Amount lost: ${financial.amountLost || "None / Not specified"}` },
+    { text: `Amount lost: ${formatAmountLost(financial.amountLost, "None / Not specified")}` },
     { text: `Payment method: ${financial.paymentMethod || "N/A"}` },
     { text: `Affected institutions: ${financial.affectedAccounts || "None"}` },
     { text: "" },

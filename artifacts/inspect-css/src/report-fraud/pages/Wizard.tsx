@@ -159,7 +159,7 @@ function Step1Incident({ session, onNext }: { session: ReturnType<typeof useFrau
               <SelectItem value="Phishing / Fake Website">Phishing / Fake Website</SelectItem>
               <SelectItem value="Identity Theft">Identity Theft</SelectItem>
               <SelectItem value="Online Shopping Scam">Online Shopping Scam</SelectItem>
-              <SelectItem value="Tech Support Scam">Tech Support Scam</SelectItem>
+              <SelectItem value="Tech Support Scam">Trojan Virus Attack</SelectItem>
               <SelectItem value="Investment Scam">Investment Scam</SelectItem>
               <SelectItem value="Other">Other</SelectItem>
             </SelectContent>
@@ -169,7 +169,7 @@ function Step1Incident({ session, onNext }: { session: ReturnType<typeof useFrau
 
         <div>
           <label htmlFor="contactChannel" className="block text-xs font-bold uppercase tracking-wider text-[#102f43] mb-1.5">
-            How were you contacted? <span className="text-[#b84635]">*</span>
+            What was the last activity or contact associated with the incident? <span className="text-[#b84635]">*</span>
           </label>
           <Input 
             id="contactChannel"
@@ -281,7 +281,7 @@ function Step2Narrative({ session, onNext, onPrev }: { session: ReturnType<typeo
             id="suspectName"
             maxLength={100}
             className={`h-12 border-[#17364a]/30 focus-visible:ring-[#c39b4a] ${touched.suspectName && errors.suspectName ? 'border-[#b84635] focus-visible:ring-[#b84635]' : ''}`}
-            placeholder="e.g. 'John Smith' or 'FakeSupport LLC'"
+            placeholder="e.g. 'John Smith' or 'Stake LLC'"
             value={data.suspectName}
             onChange={e => setData({...data, suspectName: e.target.value})}
             onBlur={() => handleBlur('suspectName')}
@@ -293,13 +293,13 @@ function Step2Narrative({ session, onNext, onPrev }: { session: ReturnType<typeo
         
         <div>
           <label htmlFor="suspectContact" className="block text-xs font-bold uppercase tracking-wider text-[#102f43] mb-1.5">
-            Suspect Contact Info <span className="text-[#4e6666] font-normal lowercase tracking-normal">(optional)</span>
+            Disputed Company or Organization <span className="text-[#4e6666] font-normal lowercase tracking-normal">(optional)</span>
           </label>
           <Input 
             id="suspectContact"
             maxLength={100}
             className={`h-12 border-[#17364a]/30 focus-visible:ring-[#c39b4a] ${touched.suspectContact && errors.suspectContact ? 'border-[#b84635] focus-visible:ring-[#b84635]' : ''}`}
-            placeholder="Phone number, email, or website used by the suspect"
+            placeholder="Stake, BET365, Pornhub, xHamster"
             value={data.suspectContact}
             onChange={e => setData({...data, suspectContact: e.target.value})}
             onBlur={() => handleBlur('suspectContact')}
@@ -391,17 +391,20 @@ function Step3Financial({ session, onNext, onPrev }: { session: ReturnType<typeo
           <label htmlFor="amountLost" className="block text-xs font-bold uppercase tracking-wider text-[#102f43] mb-1.5">
             Estimated Amount Lost <span className="text-[#4e6666] font-normal lowercase tracking-normal">(optional)</span>
           </label>
-          <Input 
-            id="amountLost"
-            inputMode="decimal"
-            className={`h-12 border-[#17364a]/30 focus-visible:ring-[#c39b4a] ${touched.amountLost && errors.amountLost ? 'border-[#b84635] focus-visible:ring-[#b84635]' : ''}`}
-            placeholder="$0.00"
-            value={data.amountLost}
-            onChange={e => setData({...data, amountLost: e.target.value})}
-            onBlur={() => handleBlur('amountLost')}
-            aria-invalid={!!(touched.amountLost && errors.amountLost)}
-            aria-describedby={errors.amountLost ? "err-amountLost" : undefined}
-          />
+          <div className="relative">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-[#4e6666]" aria-hidden="true">$</span>
+            <Input
+              id="amountLost"
+              inputMode="decimal"
+              className={`h-12 border-[#17364a]/30 pl-9 focus-visible:ring-[#c39b4a] ${touched.amountLost && errors.amountLost ? 'border-[#b84635] focus-visible:ring-[#b84635]' : ''}`}
+              placeholder="0.00"
+              value={data.amountLost.replace(/^\$\s*/, "")}
+              onChange={e => setData({...data, amountLost: e.target.value.replace(/^\$\s*/, "")})}
+              onBlur={() => handleBlur('amountLost')}
+              aria-invalid={!!(touched.amountLost && errors.amountLost)}
+              aria-describedby={errors.amountLost ? "err-amountLost" : undefined}
+            />
+          </div>
           {touched.amountLost && <FieldError error={errors.amountLost} id="err-amountLost" />}
         </div>
         
