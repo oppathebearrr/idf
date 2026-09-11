@@ -76,7 +76,10 @@ export default function Confirmation() {
               <div>
                 <strong className="font-bold block mb-1">Keep this document</strong>
                 <p className="text-sm font-medium leading-relaxed">
-                  This is a standalone debt non-authorization declaration, not a chargeable payment method. The PDF and printout contain only masked card details. Nothing was sent to a server, saved to a vault, or emailed.
+                  This is a standalone authorization document, not a payment method and cannot be used to make a charge. The PDF and printed copy contain only masked card details. No card information was transmitted to a server, stored in a vault, or sent by email.
+                </p>
+                <p className="mt-3 text-sm font-medium leading-relaxed">
+                  Keep this document as supporting evidence if you need to dispute a debt or transaction that you did not authorize or make. It may help document your position when communicating with the creditor or debt collector.
                 </p>
               </div>
             </div>
