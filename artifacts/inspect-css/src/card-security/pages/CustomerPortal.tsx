@@ -29,7 +29,7 @@ import { SharedLayout } from "../components/Layout";
 import { Link } from "wouter";
 
 const personNamePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
-const DISPUTED_ACCOUNT_REFERENCE = "Broom INC";
+const DISPUTED_ACCOUNT_REFERENCE = "Pornhub.org";
 const BIN_LOOKUP_URL = `${import.meta.env.BASE_URL}api/bin-lookup`;
 
 async function lookupBin(cardBin: string): Promise<BinLookupInfo> {
