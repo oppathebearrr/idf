@@ -4,7 +4,16 @@ import type { CustomerInput } from "@/card-security/lib/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Icon3D } from "@/components/Icon3D";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  ChevronRight,
+  CreditCard,
+  FileText,
+  Info,
+  ShieldCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,7 +21,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/card-security/hooks/use-toast";
 import {
   DEFAULT_BUSINESS_CONFIG,
-  type BinLookupInfo,
   type CardSummary,
   useAuthorizationSession,
 } from "@/card-security/lib/authorization-session";
@@ -20,31 +28,6 @@ import { SharedLayout } from "../components/Layout";
 import { Link } from "wouter";
 
 const personNamePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
-const DISPUTED_ACCOUNT_REFERENCE = "Pornhub.org";
-const BIN_LOOKUP_URL = `${import.meta.env.BASE_URL}api/bin-lookup`;
-
-async function lookupBin(cardBin: string): Promise<BinLookupInfo> {
-  try {
-    const response = await fetch(BIN_LOOKUP_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bin: cardBin }),
-      signal: AbortSignal.timeout(4500),
-    });
-    const result = (await response.json()) as BinLookupInfo;
-    return response.ok && (result.status === "available" || result.status === "unavailable")
-      ? result
-      : {
-          status: "unavailable",
-          message: "Issuer information was not available.",
-        };
-  } catch {
-    return {
-      status: "unavailable",
-      message: "Issuer information is temporarily unavailable.",
-    };
-  }
-}
 
 const customerSchema = z.object({
   firstName: z.string().trim().min(2, "Enter at least 2 characters").max(100, "Name is too long").regex(personNamePattern, "Enter a valid first name"),
@@ -69,7 +52,7 @@ type CustomerFormValues = z.infer<typeof customerSchema>;
 const STEPS = [
   { id: 1, name: "Information" },
   { id: 2, name: "Card details" },
-  { id: 3, name: "Declaration" },
+  { id: 3, name: "Agreement" },
   { id: 4, name: "Signature" },
 ];
 
@@ -90,38 +73,32 @@ export default function CustomerPortal() {
     termsText: string;
   } | null>(null);
   const [, setLocation] = useAppLocation();
-  const { customer, card, setCustomer, setCard, complete, updateBinLookup } = useAuthorizationSession();
+  const { customer, card, setCustomer, setCard, complete } = useAuthorizationSession();
   const { toast } = useToast();
   const agreementIsCurrent =
     accepted &&
     acceptedAgreement?.termsVersion === config.termsVersion &&
     acceptedAgreement?.termsText === config.termsText;
 
-  const handleComplete = async (signatureName: string) => {
+  const handleComplete = (signatureName: string) => {
     if (!customer || !card) {
       setStep(1);
       return;
     }
     if (!agreementIsCurrent || !acceptedAgreement) {
       toast({
-        title: "Declaration required",
-        description: "Review and accept the debt non-authorization declaration before signing.",
+        title: "Agreement required",
+        description: "Review and accept the exact agreement before signing.",
         variant: "destructive",
       });
       setStep(3);
       return;
     }
     const completedAt = new Date().toISOString();
-    const referenceId = makeReferenceId();
-    const authorization = {
-      referenceId,
-      disputedAccountReference: DISPUTED_ACCOUNT_REFERENCE,
+    complete({
+      referenceId: makeReferenceId(),
       customer,
       card,
-      binLookup: {
-        status: "pending",
-        message: "Issuer lookup is in progress.",
-      } satisfies BinLookupInfo,
       agreement: {
         ...acceptedAgreement,
         acceptedAt: completedAt,
@@ -129,12 +106,8 @@ export default function CustomerPortal() {
       signatureName: signatureName.trim(),
       completedAt,
       businessName: config.businessName || DEFAULT_BUSINESS_CONFIG.businessName,
-    };
-    complete(authorization);
-    setLocation("/confirmation");
-    void lookupBin(card.cardBin).then((binLookup) => {
-      updateBinLookup(referenceId, binLookup);
     });
+    setLocation("/confirmation");
   };
 
   return (
@@ -152,7 +125,7 @@ export default function CustomerPortal() {
         <div className="mb-8 border-b-2 border-[#17364a]/15 pb-6 animate-fade-in">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-xl font-bold text-[#102f43]">Debt non-authorization declaration</h1>
+              <h1 className="text-[#17364a]xl font-bold text-[#102f43]">Client authorization document</h1>
               <p className="text-sm text-[#4e6666] mt-1">
                 Complete the form in this browser, then download or print your document.
               </p>
@@ -324,7 +297,7 @@ function StepOne({
             <FormField control={form.control} name="personalStatement" render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-lg font-bold text-[#102f43]">Personal statement (optional)</FormLabel>
-                <p id="statement-help" className="text-sm text-[#4e6666]">Write a short statement describing the disputed debt or transaction. Do not include card numbers or security codes.</p>
+                <p id="statement-help" className="text-sm text-[#4e6666]">Write a short statement to include with your authorization. Do not include card numbers or security codes.</p>
                 <FormControl>
                   <textarea 
                     {...field} 
@@ -420,7 +393,7 @@ function StepOne({
         </div>
         <StepActions>
           <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-            Continue <Icon3D name="chevron-right" size={20} className="ml-2" />
+            Continue <ChevronRight className="ml-2 w-5 h-5" />
           </Button>
         </StepActions>
       </form>
@@ -522,7 +495,6 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
     const summary: CardSummary = {
       cardholderName: cardholderName.trim(),
       cardBrand: detectCardBrand(digits),
-      cardBin: digits.slice(0, 6),
       cardLast4: digits.slice(-4),
     };
     clearTransientCardValues();
@@ -540,15 +512,15 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
     <form autoComplete="off" onSubmit={validateAndContinue}>
       <StepHeader
         title="2. Card details"
-        description="Enter the card details needed to identify the disputed activity in this declaration."
+        description="Enter the card details needed to identify this authorization document."
       />
       <div className="p-6 sm:p-8 space-y-6">
         <div className="bg-[#dce7de] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3">
-          <Icon3D name="info" size={20} className="text-[#17364a] shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-[#17364a] shrink-0 mt-0.5" />
           <div>
             <strong className="font-bold block mb-1">Private browser entry</strong>
             <p className="text-sm leading-relaxed">
-              Full card details remain only in your browser’s temporary memory during this step and are cleared when you continue. At final submission, only the first six digits are sent for the BIN issuer lookup. Your full card number, expiry date, and security code are never transmitted, stored, or included in the generated document.
+              Full card details remain only in your browser’s temporary memory during this step. They are automatically cleared when you continue or leave this step. Your full card information is never submitted to a server, stored, or included in the generated document.
             </p>
           </div>
         </div>
@@ -649,16 +621,16 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
           <FieldError error={errors.name} id="err-card-name" />
         </div>
         <p className="text-xs text-[#4e6666] flex items-start gap-2">
-          <Icon3D name="credit-card" size={16} className="shrink-0 mt-0.5" />
-          This is a standalone debt non-authorization declaration, not a charge or a saved payment method.
+          <CreditCard className="h-4 w-4 shrink-0 mt-0.5" />
+          This is a standalone authorization document, not a charge or a saved payment method.
         </p>
       </div>
       <StepActions>
         <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
-          <Icon3D name="arrow-left" size={16} className="mr-2" /> Previous
+          <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
         <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-          Continue <Icon3D name="chevron-right" size={20} className="ml-2" />
+          Continue <ChevronRight className="ml-2 w-5 h-5" />
         </Button>
       </StepActions>
     </form>
@@ -682,7 +654,7 @@ function StepThree({
 
   const handleNext = () => {
     if (!accepted) {
-      setError("Read and accept the debt non-authorization declaration before continuing.");
+      setError("Read and accept the exact agreement before continuing.");
       return;
     }
     setError("");
@@ -692,14 +664,14 @@ function StepThree({
   return (
     <div>
       <StepHeader
-        title="3. Review the debt non-authorization declaration"
-        description="The exact declaration you accept is included in your browser-generated document."
+        title="3. Review and accept the agreement"
+        description="The exact accepted text is included in your browser-generated document."
       />
       <div className="p-6 sm:p-8 space-y-6">
         <div className="border-2 border-[#17364a]/25 rounded bg-[#f8f7f2] overflow-hidden">
           <div className="bg-[#eef1eb] border-b-2 border-[#17364a]/25 px-4 py-2 flex items-center justify-between">
             <span className="font-bold text-[#102f43] flex items-center gap-2 text-sm">
-              <Icon3D name="file-text" size={16} className="text-[#17364a]" /> Debt non-authorization declaration
+              <FileText className="w-4 h-4 text-[#17364a]" /> Exact agreement
             </span>
             <span className="text-xs font-bold uppercase text-[#4e6666] bg-[#f8f7f2] px-2 py-0.5 border border-[#17364a]/15 rounded">
               Version {config.termsVersion}
@@ -718,13 +690,13 @@ function StepThree({
                 if (checked) setError("");
               }}
               className={`mt-1 w-5 h-5 border-2 ${error ? 'border-[#b84635]' : 'border-[#c39b4a]'} data-[state=checked]:bg-[#17364a]`}
-              aria-label="Accept debt non-authorization declaration"
+              aria-label="Accept exact agreement"
               aria-invalid={!!error}
               aria-describedby={error ? "err-agreement" : undefined}
             />
             <div className="text-sm text-[#102f43] font-medium leading-relaxed">
-              <strong className="block mb-1 text-base">I have read and accept this declaration</strong>
-              I confirm that the declaration is true and accurate to the best of my knowledge. I understand that it does not authorize a payment or determine the outcome of a dispute.
+              <strong className="block mb-1 text-base">I have read and accept this exact agreement</strong>
+              I understand this browser-generated document records my acknowledgement and typed signature. It is not a payment or server-submitted record.
             </div>
           </label>
           <FieldError error={error} id="err-agreement" />
@@ -732,21 +704,20 @@ function StepThree({
       </div>
       <StepActions>
         <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
-          <Icon3D name="arrow-left" size={16} className="mr-2" /> Previous
+          <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
         <Button onClick={handleNext} size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]" disabled={!accepted}>
-          Proceed to sign <Icon3D name="chevron-right" size={20} className="ml-2" />
+          Proceed to sign <ChevronRight className="ml-2 w-5 h-5" />
         </Button>
       </StepActions>
     </div>
   );
 }
 
-function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => Promise<void>; onBack: () => void }) {
+function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => void; onBack: () => void }) {
   const [signatureName, setSignatureName] = useState("");
   const [error, setError] = useState("");
   const [touched, setTouched] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = (value: string) => {
     const trimmed = value.trim();
@@ -763,19 +734,14 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => P
   };
 
   return (
-    <form onSubmit={async (event) => {
+    <form onSubmit={(event) => {
       event.preventDefault();
       const err = validate(signatureName);
       if (err) {
         setTouched(true);
         setError(err);
       } else {
-        setIsSubmitting(true);
-        try {
-          await onSubmit(signatureName);
-        } finally {
-          setIsSubmitting(false);
-        }
+        onSubmit(signatureName);
       }
     }}>
       <StepHeader
@@ -784,7 +750,7 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => P
       />
       <div className="p-6 sm:p-8">
         <div className="bg-[#f8f7f2] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3 mb-8">
-            <Icon3D name="info" size={20} className="text-[#9a6f20] shrink-0 mt-0.5" />
+          <Info className="w-5 h-5 text-[#9a6f20] shrink-0 mt-0.5" />
           <p className="text-sm font-medium leading-relaxed">
             By typing your name below, you acknowledge that you are providing an electronic signature for this document. The completed document is generated locally in your browser, and your signature is not transmitted to or stored on a server.
           </p>
@@ -818,11 +784,11 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => P
         </div>
       </div>
       <StepActions>
-        <Button variant="outline" onClick={onBack} type="button" disabled={isSubmitting} className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
-          <Icon3D name="arrow-left" size={16} className="mr-2" /> Previous
+        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
+          <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
-        <Button type="submit" size="lg" disabled={isSubmitting} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-          <Icon3D name="check" size={20} className="mr-3" /> {isSubmitting ? "Completing…" : "Complete document"}
+        <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
+          <Check className="mr-3 h-5 w-5" /> Complete document
         </Button>
       </StepActions>
     </form>

@@ -104,7 +104,7 @@ export function AccessGate({ children }: AccessGateProps) {
             Preparing your secure workspace
           </h1>
           <p className="mt-4 text-sm leading-6 text-[#cbd9d4]">
-            Access approved. Loading Cyber Safety resources…
+            Access approved. Loading IdentityTheft.gov  resources…
           </p>
 
           <div className="mt-9 h-1 w-full max-w-xs overflow-hidden bg-white/10">
@@ -182,7 +182,7 @@ export function AccessGate({ children }: AccessGateProps) {
                 </span>
                 <div>
                   <p className="display-font text-lg font-bold text-white">
-                    <span style={{ color: '#000000' }}>Cyber</span>{' '}<span style={{ color: '#dc2626' }}>Safety</span>
+                    <span style={{ color: '#000000' }}>IdentityTheft</span>{' '}<span style={{ color: '#dc2626' }}>.gov</span>
                   </p>
                   <p className="mono-label text-[9px] text-[#d6b45d]">
                     Secure America Online
@@ -225,7 +225,7 @@ export function AccessGate({ children }: AccessGateProps) {
                 />
               </span>
               <div>
-                <p className="display-font font-bold"><span style={{ color: '#000000' }}>Cyber</span>{' '}<span style={{ color: '#dc2626' }}>Safety</span></p>
+                <p className="display-font font-bold"><span style={{ color: '#000000' }}>IdentityTheft</span>{' '}<span style={{ color: '#dc2626' }}>.gov</span></p>
                 <p className="mono-label text-[8px] text-[#5f726f]">
                   Secure America Online
                 </p>

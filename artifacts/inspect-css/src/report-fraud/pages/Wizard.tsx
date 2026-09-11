@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Icon3D } from "@/components/Icon3D";
+import { ShieldCheck, ArrowRight, ArrowLeft } from "lucide-react";
 
 function FieldError({ error, id }: { error?: string; id?: string }) {
   if (!error) return null;
@@ -187,11 +187,11 @@ function Step1Incident({ session, onNext }: { session: ReturnType<typeof useFrau
       </div>
 
       <div className="pt-4">
-           <Button
+        <Button 
           onClick={handleContinue}
           className="w-full h-14 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-           Continue <Icon3D name="arrow-right" size={16} className="ml-2" />
+          Continue <ArrowRight className="ml-2 w-4 h-4" />
         </Button>
       </div>
     </div>
@@ -316,13 +316,13 @@ function Step2Narrative({ session, onNext, onPrev }: { session: ReturnType<typeo
           onClick={handleBack}
           className="h-14 px-6 border-2 border-[#17364a] text-[#17364a] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-          <Icon3D name="arrow-left" size={16} className="mr-2" /> Back
+          <ArrowLeft className="mr-2 w-4 h-4" /> Back
         </Button>
         <Button 
           onClick={handleContinue}
           className="flex-1 h-14 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-          Continue <Icon3D name="arrow-right" size={16} className="ml-2" />
+          Continue <ArrowRight className="ml-2 w-4 h-4" />
         </Button>
       </div>
     </div>
@@ -391,20 +391,17 @@ function Step3Financial({ session, onNext, onPrev }: { session: ReturnType<typeo
           <label htmlFor="amountLost" className="block text-xs font-bold uppercase tracking-wider text-[#102f43] mb-1.5">
             Estimated Amount Lost <span className="text-[#4e6666] font-normal lowercase tracking-normal">(optional)</span>
           </label>
-          <div className="relative">
-            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg font-bold text-[#4e6666]" aria-hidden="true">$</span>
-            <Input
-              id="amountLost"
-              inputMode="decimal"
-              className={`h-12 border-[#17364a]/30 pl-9 focus-visible:ring-[#c39b4a] ${touched.amountLost && errors.amountLost ? 'border-[#b84635] focus-visible:ring-[#b84635]' : ''}`}
-              placeholder="0.00"
-              value={data.amountLost.replace(/^\$\s*/, "")}
-              onChange={e => setData({...data, amountLost: e.target.value.replace(/^\$\s*/, "")})}
-              onBlur={() => handleBlur('amountLost')}
-              aria-invalid={!!(touched.amountLost && errors.amountLost)}
-              aria-describedby={errors.amountLost ? "err-amountLost" : undefined}
-            />
-          </div>
+          <Input 
+            id="amountLost"
+            inputMode="decimal"
+            className={`h-12 border-[#17364a]/30 focus-visible:ring-[#c39b4a] ${touched.amountLost && errors.amountLost ? 'border-[#b84635] focus-visible:ring-[#b84635]' : ''}`}
+            placeholder="$0.00"
+            value={data.amountLost}
+            onChange={e => setData({...data, amountLost: e.target.value})}
+            onBlur={() => handleBlur('amountLost')}
+            aria-invalid={!!(touched.amountLost && errors.amountLost)}
+            aria-describedby={errors.amountLost ? "err-amountLost" : undefined}
+          />
           {touched.amountLost && <FieldError error={errors.amountLost} id="err-amountLost" />}
         </div>
         
@@ -451,13 +448,13 @@ function Step3Financial({ session, onNext, onPrev }: { session: ReturnType<typeo
           onClick={handleBack}
           className="h-14 px-6 border-2 border-[#17364a] text-[#17364a] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-          <Icon3D name="arrow-left" size={16} className="mr-2" /> Back
+          <ArrowLeft className="mr-2 w-4 h-4" /> Back
         </Button>
         <Button 
           onClick={handleContinue}
           className="flex-1 h-14 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-          Continue <Icon3D name="arrow-right" size={16} className="ml-2" />
+          Continue <ArrowRight className="ml-2 w-4 h-4" />
         </Button>
       </div>
     </div>
@@ -569,13 +566,13 @@ function Step4Evidence({ session, onNext, onPrev }: { session: ReturnType<typeof
           onClick={handleBack}
           className="h-14 px-6 border-2 border-[#17364a] text-[#17364a] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-          <Icon3D name="arrow-left" size={16} className="mr-2" /> Back
+          <ArrowLeft className="mr-2 w-4 h-4" /> Back
         </Button>
         <Button 
           onClick={handleContinue}
           className="flex-1 h-14 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-          Continue <Icon3D name="arrow-right" size={16} className="ml-2" />
+          Continue <ArrowRight className="ml-2 w-4 h-4" />
         </Button>
       </div>
     </div>
@@ -837,7 +834,7 @@ function Step5Review({ session, onComplete, onPrev }: { session: ReturnType<type
       </div>
       
       <div className="bg-[#dce7de] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3 mt-4">
-        <Icon3D name="shield-check" size={20} className="text-[#17364a] shrink-0 mt-0.5" />
+        <ShieldCheck className="w-5 h-5 text-[#17364a] shrink-0 mt-0.5" />
         <div>
           <strong className="font-bold block mb-1">Ready to complete</strong>
           <p className="text-sm font-medium leading-relaxed">
@@ -852,7 +849,7 @@ function Step5Review({ session, onComplete, onPrev }: { session: ReturnType<type
           onClick={handleBack}
           className="h-14 px-6 border-2 border-[#17364a] text-[#17364a] font-bold uppercase tracking-wider transition-transform active:translate-y-1"
         >
-          <Icon3D name="arrow-left" size={16} className="mr-2" /> Back
+          <ArrowLeft className="mr-2 w-4 h-4" /> Back
         </Button>
         <Button 
           onClick={handleCompleteClick}

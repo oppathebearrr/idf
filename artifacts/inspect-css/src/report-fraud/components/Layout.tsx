@@ -23,7 +23,7 @@ export function SharedLayout({ children }: { children: ReactNode }) {
               />
             </span>
             <span>
-              <span className="display-font block text-lg font-bold tracking-[-0.04em]"><span style={{ color: '#000000' }}>Cyber</span>{' '}<span style={{ color: '#dc2626' }}>Safety</span></span>
+              <span className="display-font block text-lg font-bold tracking-[-0.04em]"><span style={{ color: '#000000' }}>IdentityTheft</span>{' '}<span style={{ color: '#dc2626' }}>.gov</span></span>
               <span className="mono-label block text-[9px] text-[#5f726f]">Secure America Online</span>
               <span className="mono-label block text-[9px] text-[#5f726f]">A public web review tool</span>
             </span>

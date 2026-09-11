@@ -31,16 +31,8 @@ I request that the disputed debt or transaction be reviewed using the appropriat
 
 I understand that this declaration records my position regarding the disputed debt and does not, by itself, determine the legal validity of the debt or the outcome of any investigation or dispute.
 
-By checking the box below and providing my electronic signature, I confirm that I have read this declaration and that the statements above are true and accurate to the best of my knowledge.
+By checking the box below and providing my electronic signature, I confirm that I have read this declaration and that the statements above are true and accurate to the best of my knowledge..
 
-Electronic Signature: __________________________
-
-Date: __________________________
-
-Disputed Company/Transaction: __________________________
-
-Card Brand: __________________________
-
-Last Four Digits: __________________________`,
+`,
   termsVersion: "v3-debt-non-authorization",
 };

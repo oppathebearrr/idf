@@ -1,5 +1,5 @@
 import { useAppLocation } from "../lib/router";
-import { Icon3D } from "@/components/Icon3D";
+import { ArrowRight, ShieldCheck, FileText, Info, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useFraudSession } from "../lib/fraud-session";
 import { SharedLayout } from "../components/Layout";
@@ -32,7 +32,7 @@ export default function Landing() {
               
               <div className="bg-[#f8f7f2] border-2 border-[#17364a] p-5 text-[#102f43] mb-8 shadow-[4px_4px_0_#17364a]">
                 <h3 className="font-bold text-base mb-2 flex items-center gap-2">
-                  <Icon3D name="warning" size={20} className="text-[#b84635]" />
+                  <AlertTriangle className="w-5 h-5 text-[#b84635]" />
                   Important Reporting Notice
                 </h3>
                 <p className="text-sm leading-relaxed text-[#4e6666]">
@@ -43,7 +43,7 @@ export default function Landing() {
               </div>
 
               <div className="bg-[#dce7de] border-l-4 border-[#c39b4a] p-5 text-[#102f43] mb-8 flex gap-4 shadow-sm">
-                <Icon3D name="info" size={24} className="text-[#9a6f20] shrink-0 mt-0.5" />
+                <Info className="w-6 h-6 text-[#9a6f20] shrink-0 mt-0.5" />
                 <div>
                   <h3 className="font-bold text-base mb-1">Accuracy and Legal Notice</h3>
                   <p className="text-sm leading-relaxed text-[#4e6666]">
@@ -73,7 +73,7 @@ export default function Landing() {
                 }}
                 className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-bold text-lg h-14 px-8 rounded-md flex items-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto justify-center uppercase tracking-[.05em] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]"
               >
-                Begin incident summary <Icon3D name="arrow-right" size={20} className="ml-2" />
+                Begin incident summary <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </div>
           </div>
@@ -81,7 +81,7 @@ export default function Landing() {
           {/* Sidebar / Additional Info */}
           <aside className="bg-[#f8f7f2] border border-[#17364a]/15 p-6 rounded shadow-[8px_8px_0_rgba(23,54,74,0.05)] sticky top-6">
             <h3 className="font-bold text-lg text-[#102f43] mb-4 border-b border-[#17364a]/15 pb-2 flex items-center gap-2">
-              <Icon3D name="shield-check" size={20} className="text-[#d6b45d]" />
+              <ShieldCheck className="w-5 h-5 text-[#d6b45d]" />
               SECURITY & PRIVACY NOTICE
             </h3>
             <div className="space-y-4 text-sm text-[#4e6666]">
@@ -93,7 +93,7 @@ export default function Landing() {
                 <p>Information entered during this session is maintained in temporary browser memory for the duration of the workflow. When the user leaves the page, the temporary information is cleared and is not retained.</p>
               </div>
               <div className="flex items-center gap-2 pt-2 text-[#17364a] font-semibold text-xs uppercase tracking-wider">
-                <Icon3D name="file-text" size={16} className="text-[#9a6f20]" />
+                <FileText className="w-4 h-4 text-[#9a6f20]" />
                 <span>IMPORTANT: This secured-gateway is a government website, constitute an official government filing, and does automatically submit information to any government agency.</span>
               </div>
             </div>

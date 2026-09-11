@@ -24,14 +24,34 @@ export function SharedLayout({ children }: { children: ReactNode }) {
               />
             </span>
             <span>
-              <span className="display-font block text-lg font-bold tracking-[-0.04em]"><span style={{ color: '#000000' }}>Cyber</span>{' '}<span style={{ color: '#dc2626' }}>Safety</span></span>
-              <span className="mono-label block text-[9px] text-[#5f726f]">Secure America Online</span>
-              <span className="mono-label block text-[9px] text-[#5f726f]">A public web review tool</span>
+              <span className="display-font block text-lg font-bold tracking-[-0.04em]">
+                <span style={{ color: "#000000" }}>IdentityTheft</span>{" "}
+                <span style={{ color: "#dc2626" }}>.gov</span>
+              </span>
+              <span className="mono-label block text-[9px] text-[#5f726f]">
+                Secure America Online
+              </span>
+              <span className="mono-label block text-[9px] text-[#5f726f]">
+                A public web review tool
+              </span>
             </span>
           </a>
-          <nav className="hidden items-center gap-7 text-sm font-semibold text-[#17364a] md:flex" aria-label="Main navigation">
-            <a href={HOME_URL} className="outline-focus transition-colors hover:text-[#9a6f20]">Inspection Tool</a>
-            <a href={CARD_SECURITY_URL} className="outline-focus transition-colors hover:text-[#9a6f20]">Card Security</a>
+          <nav
+            className="hidden items-center gap-7 text-sm font-semibold text-[#17364a] md:flex"
+            aria-label="Main navigation"
+          >
+            <a
+              href={HOME_URL}
+              className="outline-focus transition-colors hover:text-[#9a6f20]"
+            >
+              Inspection Tool
+            </a>
+            <a
+              href={CARD_SECURITY_URL}
+              className="outline-focus transition-colors hover:text-[#9a6f20]"
+            >
+              Card Security
+            </a>
           </nav>
         </div>
       </header>
@@ -42,13 +62,23 @@ export function SharedLayout({ children }: { children: ReactNode }) {
 
       <footer className="border-t border-[#20253c]/15 py-10 no-print mt-auto bg-[#f4f3ee]">
         <div className="inspect-container flex flex-col justify-between gap-5 text-sm text-[#4e6666] sm:flex-row sm:items-center">
-            <div className="flex items-center gap-3">
-              <span className="brand-mark grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-[#c39b4a] bg-[#f4f3ee]">
-                <img src={`${HOME_URL}security-inspection-seal.png`} alt="" className="h-full w-full object-contain" aria-hidden="true" />
-              </span>
-              <span>Security Inspection is open source software for a more accountable web.</span>
+          <div className="flex items-center gap-3">
+            <span className="brand-mark grid h-9 w-9 place-items-center overflow-hidden rounded-full border border-[#c39b4a] bg-[#f4f3ee]">
+              <img
+                src={`${HOME_URL}security-inspection-seal.png`}
+                alt=""
+                className="h-full w-full object-contain"
+                aria-hidden="true"
+              />
+            </span>
+            <span>
+              Security Inspection is open source software for a more accountable
+              web.
+            </span>
           </div>
-           <span className="font-mono text-xs text-[#17364a]">Security Inspection / local-first toolkit</span>
+          <span className="font-mono text-xs text-[#17364a]">
+            Security Inspection / local-first toolkit
+          </span>
         </div>
       </footer>
     </div>
