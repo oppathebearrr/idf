@@ -182,7 +182,7 @@ export function AccessGate({ children }: AccessGateProps) {
                 </span>
                 <div>
                   <p className="display-font text-lg font-bold text-white">
-                    Cyber Safety
+                    <span style={{ color: '#000000' }}>Cyber</span>{' '}<span style={{ color: '#dc2626' }}>Safety</span>
                   </p>
                   <p className="mono-label text-[9px] text-[#d6b45d]">
                     Secure America Online
@@ -225,7 +225,7 @@ export function AccessGate({ children }: AccessGateProps) {
                 />
               </span>
               <div>
-                <p className="display-font font-bold">Cyber Safety</p>
+                <p className="display-font font-bold"><span style={{ color: '#000000' }}>Cyber</span>{' '}<span style={{ color: '#dc2626' }}>Safety</span></p>
                 <p className="mono-label text-[8px] text-[#5f726f]">
                   Secure America Online
                 </p>
