@@ -121,4 +121,12 @@ Do not try to inspect `chrome://` pages, the Chrome Web Store, or other browser-
 ## Pointers
 
 - `artifacts/inspect-css/.replit-artifact/artifact.toml` — artifact routing and production settings
-- `artifacts/inspect-css/package.json` — preview, typecheck, and build scripts
+## Card Security Integration
+
+The site now includes the Card Security module hosted under the `/card-security` path. It is a local-only card authorization document generator.
+- **Workflow**: 4-step authorization form (Contact -> Temporary Card -> Agreement -> Signature -> Confirmation).
+- **Features**: Generates a PDF in the browser with card details masked (brand & last four digits only).
+- **Architecture**: No backend API, database, or storage. Card data is kept in-memory and discarded upon completion/exit.
+- **Where it lives**: `artifacts/inspect-css/src/card-security/` with its own Wouter nested router `CardSecurityApp.tsx`.
+- **Config**: Edit `artifacts/inspect-css/src/card-security/config.ts` to update the business name, logo, or policies.
+- **Theme**: Re-styled to match the Security Inspection (navy/gold/ivory) aesthetic rather than its original blue/slate theme.

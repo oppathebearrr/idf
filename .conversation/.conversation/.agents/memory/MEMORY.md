@@ -1,3 +1,0 @@
-- [Browser-extension hosting](inspect-css-deployment.md) — Browser-extension repositories need a hosted companion page; publish an upstream release ZIP when the extension toolchain cannot install in the workspace.
-- [Security Inspection package build](security-inspection-package.md) — Hosted builds require explicit PORT and BASE_PATH values; injected UI must wait for the extension shadow root.
-- [Imported artifact registration](imported-artifacts.md) — Register imported artifact metadata before relying on managed preview or publishing controls.

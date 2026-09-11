@@ -22,8 +22,10 @@ import {
   Route,
   Switch,
   useLocation,
+  Link,
   Router as WouterRouter,
 } from 'wouter';
+import CardSecurityApp from '@/card-security/CardSecurityApp';
 
 const queryClient = new QueryClient();
 const DOWNLOAD_URL = '/downloads/SecurityInspectv1.zip?patched=3';
@@ -81,6 +83,7 @@ function Home() {
           <nav className="hidden items-center gap-7 text-sm font-semibold text-[#17364a] md:flex" aria-label="Main navigation">
             <a href="#capabilities" className="outline-focus transition-colors hover:text-[#9a6f20]" data-testid="link-capabilities">Capabilities</a>
             <a href="#workflow" className="outline-focus transition-colors hover:text-[#9a6f20]" data-testid="link-workflow">Review protocol</a>
+            <Link href="/card-security" className="outline-focus transition-colors hover:text-[#9a6f20]">Card Security</Link>
             <a href="#download" className="outline-focus transition-colors hover:text-[#9a6f20]" data-testid="link-download">Download</a>
           </nav>
           <a href="#download" className="outline-focus grid h-10 w-10 place-items-center rounded-full border border-[#17364a] bg-[#17364a] text-[#e4bd62] md:hidden" aria-label="Jump to download" data-testid="link-download-mobile">
@@ -118,6 +121,13 @@ function Home() {
                   {downloadState === 'checking' ? 'Checking package…' : 'Download for Chrome'}
                   <ArrowDown size={17} />
                 </button>
+                <Link
+                  href="/card-security"
+                  className="download-button outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-6 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a]"
+                >
+                  <ShieldCheck size={18} />
+                  Card Security
+                </Link>
               </div>
               <div className="mt-5 min-h-6 text-sm text-[#4e6666]" aria-live="polite" data-testid="status-download">
                 {downloadState === 'missing' ? (
@@ -298,6 +308,9 @@ function Router() {
     // survives a page crash.
     <RoutedErrorBoundary>
       <Switch>
+        <Route path="/card-security" nest>
+          <CardSecurityApp />
+        </Route>
         <Route path="/" component={Home} />
         <Route component={NotFound} />
       </Switch>
