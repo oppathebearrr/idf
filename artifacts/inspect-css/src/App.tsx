@@ -121,6 +121,16 @@ function Home() {
                 <CreditCard size={18} />
                 Card Security Tool
               </Link>
+              <a
+                href="https://microsoft--proipscanner.replit.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
+              >
+                <GlobeLock size={18} />
+                IP Lookup
+                <ExternalLink size={14} aria-hidden="true" />
+              </a>
             </div>
             
             <div className="hero-reveal hero-reveal-delay-3 mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[1000px]">
