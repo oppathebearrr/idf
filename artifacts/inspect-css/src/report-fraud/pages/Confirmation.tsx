@@ -119,7 +119,7 @@ export default function Confirmation() {
                 </section>
 
                 <p className="text-xs text-[#4e6666] border-t border-[#17364a]/15 pt-4">
-                  This document was generated locally by your browser at {browserDateTime(completed.completedAt)}. It has not been submitted to any authority.
+                  Prepared locally at {browserDateTime(completed.completedAt)} to support official filing. Download the PDF and use it as a reference when completing the official form at ReportFraud.ftc.gov, IdentityTheft.gov, your bank, or the appropriate authorized agency.
                 </p>
               </div>
             </article>

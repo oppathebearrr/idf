@@ -97,7 +97,7 @@ export function downloadFraudReportPdf(report: FraudReportCompleted) {
   const pageOne: Array<{ text: string; size?: number }> = [
     { text: "FRAUD INCIDENT SUMMARY", size: 18 },
     { text: "Security Inspection - Local Document", size: 12 },
-    { text: "NOT AN OFFICIAL GOVERNMENT REPORT", size: 10 },
+    { text: "PREPARED TO SUPPORT OFFICIAL FILING", size: 10 },
     { text: "" },
     { text: `Reference ID: ${report.referenceId}` },
     { text: `Browser completion time: ${browserDateTime(report.completedAt)}` },
@@ -129,7 +129,7 @@ export function downloadFraudReportPdf(report: FraudReportCompleted) {
       `${reporter.city}, ${reporter.state} ${reporter.postalCode}`,
     ].filter(Boolean).join(", ")}` },
     { text: "" },
-    { text: "This document was generated in this browser only. It was not submitted to a server or agency." },
+    { text: "Generated locally to support official filing. Use this PDF as a reference when completing the official form at ReportFraud.ftc.gov, IdentityTheft.gov, a financial institution, or another authorized agency." },
   ];
 
   const termLines = wrapText(narrative.description || "No narrative provided.");

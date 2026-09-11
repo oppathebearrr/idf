@@ -33,10 +33,10 @@ export default function Landing() {
               <div className="bg-[#f8f7f2] border-2 border-[#17364a] p-5 text-[#102f43] mb-8 shadow-[4px_4px_0_#17364a]">
                 <h3 className="font-bold text-base mb-2 flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-[#b84635]" />
-                  Not an official report
+                  Prepared to support official filing
                 </h3>
                 <p className="text-sm leading-relaxed text-[#4e6666]">
-                  This tool helps you organize your thoughts and evidence. It does <strong>not</strong> submit data to law enforcement, government agencies, or financial institutions. You must contact them directly after generating your summary.
+                  This tool prepares a formal incident summary you can use while filing with an authorized agency. Download the completed PDF, then use it as a reference when completing the official form at ReportFraud.ftc.gov, IdentityTheft.gov, your bank, or the appropriate reporting authority.
                 </p>
               </div>
 

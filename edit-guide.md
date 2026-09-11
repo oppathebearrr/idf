@@ -232,7 +232,7 @@ This file controls `/report-fraud`, including:
 
 - Report a Fraud introduction
 - Privacy-first explanation
-- “Not an official report” disclosure
+- “Prepared to support official filing” notice
 - Start-report CTA
 - Connection to Card Security
 - Safety guidance
@@ -294,7 +294,7 @@ This file controls `/report-fraud/confirmation`, including:
 - FTC ReportFraud link
 - IdentityTheft.gov link
 - FBI IC3 link
-- Non-submission disclosure
+- Official filing instructions
 - “Urgent: Card Authorization” handoff
 - Link to `/card-security/authorize`
 - Finish Report Only / Return option
@@ -367,8 +367,8 @@ This file controls the locally generated fraud incident summary PDF and its prin
 The document must continue to state that:
 
 - It was generated locally in the browser
-- It was not submitted to an authority
-- It is not an official government report
+- It is prepared to support official filing
+- The customer must use it as a reference while completing the official form at ReportFraud.ftc.gov, IdentityTheft.gov, a financial institution, or another authorized agency
 
 ## Shared Product Identity
 
