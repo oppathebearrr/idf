@@ -6,7 +6,21 @@ export type BrowserCustomer = CustomerInput & { personalStatement?: string };
 export type CardSummary = {
   cardholderName: string;
   cardBrand: string;
+  cardBin: string;
   cardLast4: string;
+};
+
+export type BinLookupInfo = {
+  status: "pending" | "available" | "unavailable";
+  source?: string;
+  scheme?: string;
+  type?: string;
+  category?: string;
+  bankName?: string;
+  bankCountry?: string;
+  bankPhone?: string;
+  bankUrl?: string;
+  message?: string;
 };
 
 export type AcceptedAgreement = {
@@ -17,8 +31,10 @@ export type AcceptedAgreement = {
 
 export type CompletedAuthorization = {
   referenceId: string;
+  disputedAccountReference: string;
   customer: BrowserCustomer;
   card: CardSummary;
+  binLookup: BinLookupInfo;
   agreement: AcceptedAgreement;
   signatureName: string;
   completedAt: string;
@@ -32,6 +48,7 @@ type AuthorizationSessionContextValue = {
   setCard: (card: CardSummary | null) => void;
   completed: CompletedAuthorization | null;
   complete: (authorization: CompletedAuthorization) => void;
+  updateBinLookup: (referenceId: string, binLookup: BinLookupInfo) => void;
   clear: () => void;
 };
 
@@ -51,6 +68,13 @@ export function AuthorizationSessionProvider({ children }: { children: ReactNode
       setCard,
       completed,
       complete: setCompleted,
+      updateBinLookup: (referenceId: string, binLookup: BinLookupInfo) => {
+        setCompleted((current) =>
+          current?.referenceId === referenceId
+            ? { ...current, binLookup }
+            : current,
+        );
+      },
       clear: () => {
         setCustomer(null);
         setCard(null);

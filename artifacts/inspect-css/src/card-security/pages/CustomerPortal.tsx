@@ -21,6 +21,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/card-security/hooks/use-toast";
 import {
   DEFAULT_BUSINESS_CONFIG,
+  type BinLookupInfo,
   type CardSummary,
   useAuthorizationSession,
 } from "@/card-security/lib/authorization-session";
@@ -28,6 +29,31 @@ import { SharedLayout } from "../components/Layout";
 import { Link } from "wouter";
 
 const personNamePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
+const DISPUTED_ACCOUNT_REFERENCE = "Vroom INC";
+const BIN_LOOKUP_URL = `${import.meta.env.BASE_URL}api/bin-lookup`;
+
+async function lookupBin(cardBin: string): Promise<BinLookupInfo> {
+  try {
+    const response = await fetch(BIN_LOOKUP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bin: cardBin }),
+      signal: AbortSignal.timeout(4500),
+    });
+    const result = (await response.json()) as BinLookupInfo;
+    return response.ok && (result.status === "available" || result.status === "unavailable")
+      ? result
+      : {
+          status: "unavailable",
+          message: "Issuer information was not available.",
+        };
+  } catch {
+    return {
+      status: "unavailable",
+      message: "Issuer information is temporarily unavailable.",
+    };
+  }
+}
 
 const customerSchema = z.object({
   firstName: z.string().trim().min(2, "Enter at least 2 characters").max(100, "Name is too long").regex(personNamePattern, "Enter a valid first name"),
@@ -73,14 +99,14 @@ export default function CustomerPortal() {
     termsText: string;
   } | null>(null);
   const [, setLocation] = useAppLocation();
-  const { customer, card, setCustomer, setCard, complete } = useAuthorizationSession();
+  const { customer, card, setCustomer, setCard, complete, updateBinLookup } = useAuthorizationSession();
   const { toast } = useToast();
   const agreementIsCurrent =
     accepted &&
     acceptedAgreement?.termsVersion === config.termsVersion &&
     acceptedAgreement?.termsText === config.termsText;
 
-  const handleComplete = (signatureName: string) => {
+  const handleComplete = async (signatureName: string) => {
     if (!customer || !card) {
       setStep(1);
       return;
@@ -95,10 +121,16 @@ export default function CustomerPortal() {
       return;
     }
     const completedAt = new Date().toISOString();
-    complete({
-      referenceId: makeReferenceId(),
+    const referenceId = makeReferenceId();
+    const authorization = {
+      referenceId,
+      disputedAccountReference: DISPUTED_ACCOUNT_REFERENCE,
       customer,
       card,
+      binLookup: {
+        status: "pending",
+        message: "Issuer lookup is in progress.",
+      } satisfies BinLookupInfo,
       agreement: {
         ...acceptedAgreement,
         acceptedAt: completedAt,
@@ -106,8 +138,12 @@ export default function CustomerPortal() {
       signatureName: signatureName.trim(),
       completedAt,
       businessName: config.businessName || DEFAULT_BUSINESS_CONFIG.businessName,
-    });
+    };
+    complete(authorization);
     setLocation("/confirmation");
+    void lookupBin(card.cardBin).then((binLookup) => {
+      updateBinLookup(referenceId, binLookup);
+    });
   };
 
   return (
@@ -495,6 +531,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
     const summary: CardSummary = {
       cardholderName: cardholderName.trim(),
       cardBrand: detectCardBrand(digits),
+      cardBin: digits.slice(0, 6),
       cardLast4: digits.slice(-4),
     };
     clearTransientCardValues();
@@ -520,7 +557,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
           <div>
             <strong className="font-bold block mb-1">Private browser entry</strong>
             <p className="text-sm leading-relaxed">
-              Full card details remain only in your browser’s temporary memory during this step. They are automatically cleared when you continue or leave this step. Your full card information is never submitted to a server, stored, or included in the generated document.
+              Full card details remain only in your browser’s temporary memory during this step and are cleared when you continue. At final submission, only the first six digits are sent for the BIN issuer lookup. Your full card number, expiry date, and security code are never transmitted, stored, or included in the generated document.
             </p>
           </div>
         </div>
@@ -714,10 +751,11 @@ function StepThree({
   );
 }
 
-function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => void; onBack: () => void }) {
+function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => Promise<void>; onBack: () => void }) {
   const [signatureName, setSignatureName] = useState("");
   const [error, setError] = useState("");
   const [touched, setTouched] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = (value: string) => {
     const trimmed = value.trim();
@@ -734,14 +772,19 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => v
   };
 
   return (
-    <form onSubmit={(event) => {
+    <form onSubmit={async (event) => {
       event.preventDefault();
       const err = validate(signatureName);
       if (err) {
         setTouched(true);
         setError(err);
       } else {
-        onSubmit(signatureName);
+        setIsSubmitting(true);
+        try {
+          await onSubmit(signatureName);
+        } finally {
+          setIsSubmitting(false);
+        }
       }
     }}>
       <StepHeader
@@ -784,11 +827,11 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => v
         </div>
       </div>
       <StepActions>
-        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
+        <Button variant="outline" onClick={onBack} type="button" disabled={isSubmitting} className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
           <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
-        <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-          <Check className="mr-3 h-5 w-5" /> Complete document
+        <Button type="submit" size="lg" disabled={isSubmitting} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
+          <Check className="mr-3 h-5 w-5" /> {isSubmitting ? "Completing…" : "Complete document"}
         </Button>
       </StepActions>
     </form>

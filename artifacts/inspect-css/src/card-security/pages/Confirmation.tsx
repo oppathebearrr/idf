@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { AlertTriangle, CheckCircle, Download, FileText, Info, Printer, RotateCcw, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { browserDateTime, downloadAuthorizationPdf } from "@/card-security/lib/browser-document";
+import { browserDateOnly, browserDateTime, downloadAuthorizationPdf } from "@/card-security/lib/browser-document";
 import { useAuthorizationSession } from "@/card-security/lib/authorization-session";
 import { SharedLayout } from "../components/Layout";
 
@@ -35,6 +35,21 @@ export default function Confirmation() {
       </SharedLayout>
     );
   }
+
+  const declarationBody = completed.agreement.termsText
+    .split("\n")
+    .filter(
+      (line) =>
+        !/^(Electronic Signature|Date|Disputed Account\/Reference|Card Brand|Last Four Digits):/.test(
+          line.trim(),
+        ),
+    )
+    .join("\n")
+    .trim();
+  const displayedCardBrand =
+    completed.binLookup.status === "available" && completed.binLookup.scheme
+      ? completed.binLookup.scheme
+      : completed.card.cardBrand;
 
   return (
     <SharedLayout>
@@ -76,7 +91,7 @@ export default function Confirmation() {
               <div>
                 <strong className="font-bold block mb-1">Keep this document</strong>
                 <p className="text-sm font-medium leading-relaxed">
-                  This is a standalone authorization document, not a payment method and cannot be used to make a charge. The PDF and printed copy contain only masked card details. No card information was transmitted to a server, stored in a vault, or sent by email.
+                  This is a standalone authorization document, not a payment method and cannot be used to make a charge. The PDF and printed copy contain only masked card details. Only the first six digits were transmitted for the BIN issuer lookup; the full card number, expiry date, and security code were not transmitted, stored in a vault, or sent by email.
                 </p>
                 <p className="mt-3 text-sm font-medium leading-relaxed">
                   Keep this document as supporting evidence if you need to dispute a debt or transaction that you did not authorize or make. It may help document your position when communicating with the creditor or debt collector.
@@ -108,7 +123,7 @@ export default function Confirmation() {
               <h2 className="text-lg font-bold text-[#102f43] border-b border-[#17364a]/15 pb-2 mb-4">Card identification</h2>
               <dl className="grid sm:grid-cols-3 gap-x-8 gap-y-3 text-sm">
                 <SummaryField label="Cardholder" value={completed.card.cardholderName} />
-                <SummaryField label="Brand" value={completed.card.cardBrand} />
+                <SummaryField label="Brand" value={displayedCardBrand} />
                 <SummaryField label="Card details" value={`**** ${completed.card.cardLast4}`} />
               </dl>
               <p className="text-xs text-[#4e6666] mt-4">
@@ -126,8 +141,42 @@ export default function Confirmation() {
               </dl>
               <div className="border border-[#17364a]/15 rounded bg-[#f4f3ee] p-5">
                 <h3 className="font-bold text-[#102f43] mb-3">Debt non-authorization declaration accepted</h3>
-                <p className="text-sm text-[#102f43] leading-relaxed whitespace-pre-wrap">{completed.agreement.termsText}</p>
+                <p className="text-sm text-[#102f43] leading-relaxed whitespace-pre-wrap">{declarationBody}</p>
+                <dl className="mt-6 grid gap-x-8 gap-y-4 border-t border-[#17364a]/15 pt-5 sm:grid-cols-2">
+                  <SummaryField label="Electronic Signature" value={completed.signatureName} />
+                  <SummaryField label="Date" value={browserDateOnly(completed.completedAt)} />
+                  <SummaryField label="Disputed Account/Reference" value={completed.disputedAccountReference} />
+                  <SummaryField label="Card Brand" value={displayedCardBrand} />
+                  <SummaryField label="Last Four Digits" value={completed.card.cardLast4} />
+                </dl>
               </div>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-bold text-[#102f43] border-b border-[#17364a]/15 pb-2 mb-4">BIN lookup information</h2>
+              {completed.binLookup.status === "available" ? (
+                <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                  <SummaryField label="Card scheme" value={completed.binLookup.scheme || completed.card.cardBrand} />
+                  <SummaryField label="Data source" value={completed.binLookup.source || "Rotating free BIN lookup"} />
+                  <SummaryField label="Card type" value={completed.binLookup.type || "Not available"} />
+                  <SummaryField label="Card category" value={completed.binLookup.category || "Not available"} />
+                  <SummaryField label="Issuing institution" value={completed.binLookup.bankName || "Not available"} />
+                  <SummaryField label="Issuer country" value={completed.binLookup.bankCountry || "Not available"} />
+                  <SummaryField label="Issuer phone" value={completed.binLookup.bankPhone || "Not available"} />
+                  <SummaryField label="Issuer website" value={completed.binLookup.bankUrl || "Not available"} />
+                </dl>
+              ) : completed.binLookup.status === "pending" ? (
+                <p className="text-sm text-[#4e6666]">
+                  Issuer lookup is in progress. These results will update automatically.
+                </p>
+              ) : (
+                <p className="text-sm text-[#4e6666]">
+                  {completed.binLookup.message || "Issuer information was not available for this card."}
+                </p>
+              )}
+              <p className="text-xs text-[#4e6666] mt-4">
+                This lookup used only the first six card digits. The full card number was not transmitted.
+              </p>
             </section>
 
             <p className="text-xs text-[#4e6666] border-t border-[#17364a]/15 pt-4">
@@ -139,15 +188,17 @@ export default function Confirmation() {
         <div className="no-print mt-6 flex flex-col sm:flex-row gap-4">
           <Button
             onClick={() => downloadAuthorizationPdf(completed)}
+            disabled={completed.binLookup.status === "pending"}
             className="flex-1 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 rounded-md shadow-[5px_5px_0_#c39b4a] flex items-center justify-center transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]"
           >
-            <Download className="mr-2 h-5 w-5" /> Download PDF
+            <Download className="mr-2 h-5 w-5" /> {completed.binLookup.status === "pending" ? "Preparing issuer details…" : "Download PDF"}
           </Button>
           <Button
             onClick={() => window.print()}
+            disabled={completed.binLookup.status === "pending"}
             className="flex-1 bg-[#f8f7f2] hover:bg-[#eef1eb] text-[#17364a] border-2 border-[#17364a] font-extrabold uppercase tracking-[.05em] h-12 rounded-md flex items-center justify-center shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a]"
           >
-            <Printer className="mr-2 h-5 w-5" /> Print
+            <Printer className="mr-2 h-5 w-5" /> {completed.binLookup.status === "pending" ? "Preparing issuer details…" : "Print"}
           </Button>
         </div>
 

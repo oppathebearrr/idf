@@ -91,7 +91,7 @@ The Security Inspection platform provides public-service cybersecurity tools:
    - DOM navigation
    - Selected-element quick actions for Edit, Duplicate, Apply preset, and Save as preset
    - Local text presets and reusable blocks
-2. **Card Security**: A local-only secure document generator for card authorizations without transmitting sensitive data.
+2. **Card Security**: A privacy-preserving document generator that keeps customer details and card secrets local while using only the first six card digits for issuer lookup.
 3. **IP Lookup**: A quick external tool link for investigating suspicious IPs.
 4. **Report a Fraud**: A local-only privacy-first wizard for organizing fraud incidents and generating PDF summaries.
 
@@ -127,10 +127,10 @@ The site also includes the Report a Fraud module hosted under the `/report-fraud
 - **Architecture**: No backend API, no actual submissions. Data is kept in-memory and discarded.
 - **Where it lives**: `artifacts/inspect-css/src/report-fraud/` with its own nested Wouter router.
 
-The site now includes the Card Security module hosted under the `/card-security` path. It is a local-only card authorization document generator.
+The site now includes the Card Security module hosted under the `/card-security` path. It generates the completed declaration locally and uses a privacy-limited backend BIN lookup.
 - **Workflow**: 4-step authorization form (Contact -> Temporary Card -> Agreement -> Signature -> Confirmation).
-- **Features**: Generates a PDF in the browser with card details masked (brand & last four digits only).
-- **Architecture**: No backend API, database, or storage. Card data is kept in-memory and discarded upon completion/exit.
+- **Features**: Generates a PDF in the browser with masked card identification and normalized issuer information.
+- **Architecture**: Customer details, signature, full card number, expiry, and security code remain browser-only. The first six card digits are sent to `/api/bin-lookup`, which rotates across free providers without persistence. No database is used.
 - **Where it lives**: `artifacts/inspect-css/src/card-security/` with its own Wouter nested router `CardSecurityApp.tsx`.
 - **Config**: Edit `artifacts/inspect-css/src/card-security/config.ts` to update the business name, logo, or policies.
 - **Theme**: Re-styled to match the Security Inspection (navy/gold/ivory) aesthetic rather than its original blue/slate theme.

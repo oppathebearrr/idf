@@ -127,7 +127,7 @@ Use this file to edit:
 - Step navigation
 - Step progress labels
 
-Sensitive card-data handling is also implemented in this file. Do not add persistence, logging, API requests, or full card details to completed output.
+Sensitive card-data handling is also implemented in this file. Only the first six digits may be sent to `/api/bin-lookup`. Do not persist or log those digits, and never add the full card number, expiry, or security code to state, requests, or completed output.
 
 ### Card Security completed document
 
@@ -144,6 +144,7 @@ This file controls `/card-security/confirmation`, including:
 - Session-ended state
 - Start-new-document behavior
 - Privacy statements
+- BIN issuer details and unavailable state
 - Links back to the main site
 - Links to Report a Fraud
 
@@ -194,7 +195,7 @@ Edit only when changing workflow state behavior:
 
 `artifacts/inspect-css/src/card-security/lib/authorization-session.tsx`
 
-This file controls the temporary browser-memory session for the Card Security workflow.
+This file controls the temporary browser-memory session for the Card Security workflow, including the safe card summary and normalized BIN lookup result.
 
 ### Card Security PDF and print output
 
@@ -204,7 +205,15 @@ Edit:
 
 This file controls locally generated Card Security PDFs and print documents.
 
-Keep the output limited to the masked card brand and last four digits. Full card number, expiry, and security code must not be added.
+Keep card identification limited to the card brand and last four digits, plus normalized issuer metadata. Full card number, expiry, security code, and the six-digit BIN itself must not be added to the PDF or print output.
+
+### Card Security BIN lookup
+
+Edit:
+
+`artifacts/api-server/src/routes/bin-lookup.ts`
+
+This backend route validates an exact six-digit BIN, rotates across free no-key lookup providers with bounded timeouts and fallback, and normalizes issuer data. Do not log or persist the BIN, and never accept a full card number.
 
 ### Card Security internal routing helper
 

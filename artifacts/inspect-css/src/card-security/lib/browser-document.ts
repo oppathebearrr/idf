@@ -92,6 +92,12 @@ export function browserDateTime(isoDate: string) {
   });
 }
 
+export function browserDateOnly(isoDate: string) {
+  return new Date(isoDate).toLocaleDateString(undefined, {
+    dateStyle: "long",
+  });
+}
+
 export function downloadAuthorizationPdf(authorization: CompletedAuthorization) {
   const { customer, card, agreement } = authorization;
   const pageOne: Array<{ text: string; size?: number }> = [
@@ -114,7 +120,7 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
     { text: "" },
     { text: "Card identification", size: 13 },
     { text: `Cardholder: ${card.cardholderName}` },
-    { text: `Brand: ${card.cardBrand}` },
+    { text: `Brand: ${authorization.binLookup.scheme || card.cardBrand}` },
     { text: `Card details: **** ${card.cardLast4}` },
     { text: "Only the card brand and last four digits are included. Full card details are not included." },
     { text: "" },
@@ -124,10 +130,28 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
     { text: `Typed signature: ${authorization.signatureName}` },
     { text: `Accepted in browser at: ${browserDateTime(agreement.acceptedAt)}` },
     { text: "" },
-    { text: "This document was completed in this browser only. It was not submitted to a server, saved to a vault, or sent by email." },
+    ...wrapText(
+      "Customer details, signature, and this completed document remained in this browser. Only the first six card digits were sent for the issuer lookup; the full card number, expiry date, and security code were not transmitted.",
+      82,
+    ).map((text) => ({ text })),
   ];
 
-  const termLines = wrapText(agreement.termsText);
+  const populatedDeclaration = agreement.termsText
+    .replace(
+      /^Electronic Signature:.*$/m,
+      `Electronic Signature: ${authorization.signatureName}`,
+    )
+    .replace(/^Date:.*$/m, `Date: ${browserDateOnly(authorization.completedAt)}`)
+    .replace(
+      /^Disputed Account\/Reference:.*$/m,
+      `Disputed Account/Reference: ${authorization.disputedAccountReference}`,
+    )
+    .replace(
+      /^Card Brand:.*$/m,
+      `Card Brand: ${authorization.binLookup.scheme || card.cardBrand}`,
+    )
+    .replace(/^Last Four Digits:.*$/m, `Last Four Digits: ${card.cardLast4}`);
+  const termLines = wrapText(populatedDeclaration);
   const pageSize = 47;
   const pages: Array<Array<{ text: string; size?: number }>> = [pageOne];
   for (let index = 0; index < termLines.length; index += pageSize) {
@@ -138,6 +162,37 @@ export function downloadAuthorizationPdf(authorization: CompletedAuthorization) 
       ...termLines.slice(index, index + pageSize).map((text) => ({ text })),
     ]);
   }
+
+  const binLookupLines: Array<{ text: string; size?: number }> = [
+    { text: "BIN LOOKUP INFORMATION", size: 15 },
+    { text: "Lookup performed using only the first six card digits." },
+    { text: "The full card number was not transmitted." },
+    { text: "" },
+  ];
+
+  if (authorization.binLookup.status === "available") {
+    binLookupLines.push(
+      { text: `Card scheme: ${authorization.binLookup.scheme || card.cardBrand}` },
+      { text: `Data source: ${authorization.binLookup.source || "Rotating free BIN lookup"}` },
+      { text: `Card type: ${authorization.binLookup.type || "Not available"}` },
+      { text: `Card category: ${authorization.binLookup.category || "Not available"}` },
+      { text: `Issuing institution: ${authorization.binLookup.bankName || "Not available"}` },
+      { text: `Issuer country: ${authorization.binLookup.bankCountry || "Not available"}` },
+      { text: `Issuer phone: ${authorization.binLookup.bankPhone || "Not available"}` },
+      { text: `Issuer website: ${authorization.binLookup.bankUrl || "Not available"}` },
+    );
+  } else if (authorization.binLookup.status === "pending") {
+    binLookupLines.push({
+      text: "Issuer lookup is still in progress. Download the document again after the result updates.",
+    });
+  } else {
+    binLookupLines.push({
+      text:
+        authorization.binLookup.message ||
+        "Issuer information was not available for this card.",
+    });
+  }
+  pages.push(binLookupLines);
 
   const bytes = createPdfBytes(pages);
   const blob = new Blob([bytes], { type: "application/pdf" });
