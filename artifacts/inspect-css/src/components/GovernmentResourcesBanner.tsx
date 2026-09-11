@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { ExternalLink, Landmark, Pause, Play } from "lucide-react";
+import { ExternalLink, Landmark } from "lucide-react";
 
 type ResourceCategory = "fraud" | "finance" | "credit" | "law" | "federal";
 
@@ -210,8 +209,6 @@ function ResourceSet({ duplicate = false }: { duplicate?: boolean }) {
 }
 
 export function GovernmentResourcesBanner() {
-  const [isPaused, setIsPaused] = useState(false);
-
   return (
     <section className="gov-resources" aria-labelledby="government-resources-title">
       <div className="inspect-container">
@@ -221,40 +218,21 @@ export function GovernmentResourcesBanner() {
               <Landmark size={22} />
             </span>
             <div>
-              <span className="mono-label text-[#b9923e]">Official help directory</span>
-              <h2 id="government-resources-title" className="display-font mt-1 text-xl font-bold tracking-[-.04em] text-white sm:text-2xl">
-                Trusted federal resources
+              <h2 id="government-resources-title" className="display-font text-xl font-bold tracking-[-.04em] text-[#102f43] sm:text-2xl">
+                Official Partnership with Trusted federal resources
               </h2>
             </div>
           </div>
-          <button
-            type="button"
-            className="gov-resources-verified outline-focus"
-            aria-pressed={isPaused}
-            onClick={() => setIsPaused((paused) => !paused)}
-          >
-            {isPaused ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}
-            <span>{isPaused ? "Resume" : "Pause"}</span>
-          </button>
         </div>
       </div>
 
       <div
         className="gov-resource-marquee"
         aria-label="Official United States government resources"
-        data-paused={isPaused}
-        onFocus={() => setIsPaused(true)}
       >
         <div className="gov-resource-track">
           <ResourceSet />
-          <ResourceSet duplicate />
         </div>
-      </div>
-
-      <div className="inspect-container">
-        <p className="gov-resources-note">
-          Links open external official websites. Cyber Safety provides this directory for convenience and is not affiliated with or endorsed by the listed agencies.
-        </p>
       </div>
     </section>
   );

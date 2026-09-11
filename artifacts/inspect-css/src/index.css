@@ -473,10 +473,7 @@ button:focus-visible {
   position: relative;
   overflow: hidden;
   padding: 0.9rem 0 0.55rem;
-  border-bottom: 1px solid rgb(195 155 74 / 0.5);
-  background:
-    radial-gradient(circle at 12% 0%, rgb(195 155 74 / 0.12), transparent 28rem),
-    #102f43;
+  background: #f8f7f2;
 }
 
 .gov-resources-heading {
@@ -493,63 +490,26 @@ button:focus-visible {
   height: 2.35rem;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid rgb(195 155 74 / 0.65);
-  background: rgb(248 247 242 / 0.07);
-  color: #e4bd62;
-  box-shadow: 4px 4px 0 rgb(195 155 74 / 0.2);
-}
-
-.gov-resources-verified {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid rgb(228 189 98 / 0.35);
-  cursor: pointer;
-  padding: 0.4rem 0.65rem;
-  background: transparent;
-  color: #d9e1df;
-  font-family: var(--app-font-mono);
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  border: 0;
+  background: #eef1eb;
+  color: #17364a;
+  box-shadow: none;
 }
 
 .gov-resource-marquee {
   width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
   padding: 0.1rem 0 0.35rem;
-  mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  mask-image: none;
+  -webkit-mask-image: none;
 }
 
 .gov-resource-track {
   display: flex;
   width: max-content;
-  will-change: transform;
-  animation: gov-resource-scroll 115s linear infinite;
-}
-
-.gov-resource-marquee:hover .gov-resource-track,
-.gov-resource-marquee:focus-within .gov-resource-track {
-  animation-play-state: paused;
-}
-
-.gov-resource-marquee[data-paused="true"] {
-  overflow-x: auto;
-  mask-image: none;
-  -webkit-mask-image: none;
-}
-
-.gov-resource-marquee[data-paused="true"] .gov-resource-track {
   animation: none;
   transform: none;
   will-change: auto;
-}
-
-.gov-resource-marquee[data-paused="true"] .gov-resource-set[aria-hidden="true"] {
-  display: none;
 }
 
 .gov-resource-set {
@@ -669,11 +629,6 @@ button:focus-visible {
   line-height: 1.5;
 }
 
-@keyframes gov-resource-scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-
 @media (max-width: 640px) {
   .gov-resources {
     padding-top: 0.75rem;
@@ -686,10 +641,6 @@ button:focus-visible {
 
   .gov-resources-heading-icon {
     display: none;
-  }
-
-  .gov-resources-verified {
-    padding: 0.35rem 0.5rem;
   }
 
   .gov-resource-card {
@@ -716,9 +667,6 @@ button:focus-visible {
     will-change: auto;
   }
 
-  .gov-resource-set[aria-hidden="true"] {
-    display: none;
-  }
 }
 
 @media print {
