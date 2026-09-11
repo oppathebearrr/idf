@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AlertTriangle, CheckCircle, Download, FileText, Info, Printer, RotateCcw } from "lucide-react";
+import { AlertTriangle, CheckCircle, Download, FileText, Info, Printer, RotateCcw, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { browserDateTime, downloadAuthorizationPdf } from "@/card-security/lib/browser-document";
 import { useAuthorizationSession } from "@/card-security/lib/authorization-session";
@@ -147,6 +147,14 @@ export default function Confirmation() {
             <Printer className="mr-2 h-5 w-5" /> Print
           </Button>
         </div>
+
+        <div className="no-print mt-6 bg-[#f8f7f2] border border-[#17364a]/25 p-5 text-center text-sm text-[#4e6666] shadow-sm rounded">
+          <p className="mb-2">Documenting a disputed charge or potential scam?</p>
+          <a href={`${import.meta.env.BASE_URL}report-fraud`} className="text-[#17364a] font-bold hover:text-[#9a6f20] inline-flex items-center justify-center transition-colors">
+            Use the Report a Fraud tool to organize your incident details <ArrowRight className="ml-1 w-4 h-4" />
+          </a>
+        </div>
+
         <div className="no-print mt-8 text-center">
           <Button variant="link" className="text-[#17364a] font-bold" onClick={startNew}>
             <RotateCcw className="mr-2 h-4 w-4" /> Start a new document

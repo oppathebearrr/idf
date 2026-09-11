@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useState, type FormEvent, useMemo, type ReactNode } from "react";
 import { useAppLocation } from "@/card-security/lib/router";
 import type { CustomerInput } from "@/card-security/lib/types";
 import { useForm } from "react-hook-form";
@@ -24,18 +24,27 @@ import {
   type CardSummary,
   useAuthorizationSession,
 } from "@/card-security/lib/authorization-session";
+import { SharedLayout } from "../components/Layout";
+import { Link } from "wouter";
+
+const personNamePattern = /^[\p{L}\p{M}][\p{L}\p{M} .'-]*$/u;
 
 const customerSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required"),
-  lastName: z.string().trim().min(1, "Last name is required"),
-  company: z.string().optional().default(""),
+  firstName: z.string().trim().min(2, "Enter at least 2 characters").max(100, "Name is too long").regex(personNamePattern, "Enter a valid first name"),
+  lastName: z.string().trim().min(2, "Enter at least 2 characters").max(100, "Name is too long").regex(personNamePattern, "Enter a valid last name"),
+  company: z.string().trim().max(100, "Company name is too long").optional().default(""),
   personalStatement: z.string().trim().max(1000, "Please keep your statement within 1,000 characters.").optional(),
-  email: z.string().trim().email("Valid email is required"),
-  phone: z.string().trim().min(10, "Valid phone is required"),
-  address: z.string().trim().min(1, "Address is required"),
-  city: z.string().trim().min(1, "City is required"),
-  state: z.string().trim().min(2, "State is required"),
-  zip: z.string().trim().min(5, "ZIP is required"),
+  email: z.string().trim().email("Valid email is required").max(255, "Email is too long"),
+  phone: z.string().trim()
+    .regex(/^\+?[\d\s\-().]{7,25}$/, "Enter a valid phone number")
+    .refine((value) => {
+      const digitCount = value.replace(/\D/g, "").length;
+      return digitCount >= 7 && digitCount <= 15;
+    }, "Phone number must contain 7 to 15 digits"),
+  address: z.string().trim().min(1, "Address is required").max(200, "Address is too long"),
+  city: z.string().trim().min(1, "City is required").max(100, "City is too long"),
+  state: z.string().trim().regex(/^[a-zA-Z]{2}$/, "Use 2-letter US state code").transform(v => v.toUpperCase()),
+  zip: z.string().trim().regex(/^\d{5}(-\d{4})?$/, "Use a 5 or 9-digit ZIP code"),
 });
 
 type CustomerFormValues = z.infer<typeof customerSchema>;
@@ -54,9 +63,6 @@ function makeReferenceId() {
       : Math.random().toString(36).slice(2, 14);
   return `LOCAL-${random.toUpperCase()}`;
 }
-
-import { SharedLayout } from "../components/Layout";
-import { Link } from "wouter";
 
 export default function CustomerPortal() {
   const config = DEFAULT_BUSINESS_CONFIG;
@@ -194,6 +200,11 @@ export default function CustomerPortal() {
   );
 }
 
+function FieldError({ error, id }: { error?: string; id?: string }) {
+  if (!error) return null;
+  return <p id={id} className="text-[#b84635] text-xs font-bold mt-1.5" role="alert">{error}</p>;
+}
+
 function StepOne({
   initialValues,
   onNext,
@@ -247,12 +258,16 @@ function StepOne({
                     <FormControl>
                       <Input
                         type={name === "email" ? "email" : name === "phone" ? "tel" : "text"}
+                        inputMode={name === "email" ? "email" : name === "phone" ? "tel" : "text"}
+                        maxLength={name === "email" ? 255 : name === "phone" ? 20 : 100}
                         className={inputClass}
-                        autoComplete={name === "email" ? "email" : name === "phone" ? "tel" : "given-name"}
+                        autoComplete={name === "email" ? "email" : name === "phone" ? "tel" : name === "firstName" ? "given-name" : "family-name"}
+                        aria-invalid={!!form.formState.errors[name]}
+                        aria-describedby={form.formState.errors[name] ? `err-${name}` : undefined}
                         {...field}
                       />
                     </FormControl>
-                    <FormMessage className="font-medium text-red-600" />
+                    <FormMessage id={`err-${name}`} className="font-medium text-red-600" />
                   </FormItem>
                 )}
               />
@@ -263,8 +278,17 @@ function StepOne({
               render={({ field }) => (
                 <FormItem className="sm:col-span-2">
                   <FormLabel className="font-bold text-[#102f43]">Company (optional)</FormLabel>
-                  <FormControl><Input className={inputClass} autoComplete="organization" {...field} /></FormControl>
-                  <FormMessage className="font-medium text-red-600" />
+                  <FormControl>
+                    <Input 
+                      className={inputClass} 
+                      autoComplete="organization" 
+                      maxLength={100}
+                      aria-invalid={!!form.formState.errors.company}
+                      aria-describedby={form.formState.errors.company ? "err-company" : undefined}
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage id="err-company" className="font-medium text-red-600" />
                 </FormItem>
               )}
             />
@@ -275,10 +299,21 @@ function StepOne({
                 <FormLabel className="text-lg font-bold text-[#102f43]">Personal statement (optional)</FormLabel>
                 <p id="statement-help" className="text-sm text-[#4e6666]">Write a short statement to include with your authorization. Do not include card numbers or security codes.</p>
                 <FormControl>
-                  <textarea {...field} value={field.value ?? ""} rows={4} maxLength={1000} aria-describedby="statement-help statement-count" placeholder="Write your personal statement here…" className="w-full rounded border-2 border-[#17364a]/25 bg-[#f8f7f2] p-3 text-base focus:border-[#c39b4a] focus:outline-none focus:ring-2 focus:ring-[#c39b4a]/20" />
+                  <textarea 
+                    {...field} 
+                    value={field.value ?? ""} 
+                    rows={4} 
+                    maxLength={1000} 
+                    aria-invalid={!!form.formState.errors.personalStatement}
+                    aria-describedby={`statement-help statement-count ${form.formState.errors.personalStatement ? "err-statement" : ""}`} 
+                    placeholder="Write your personal statement here…" 
+                    className="w-full rounded border-2 border-[#17364a]/25 bg-[#f8f7f2] p-3 text-base focus:border-[#c39b4a] focus:outline-none focus:ring-2 focus:ring-[#c39b4a]/20" 
+                  />
                 </FormControl>
-                <p id="statement-count" className="text-xs text-[#4e6666]">{field.value?.length ?? 0} / 1,000 characters</p>
-                <FormMessage />
+                <div className="flex justify-between items-start mt-1">
+                  <FormMessage id="err-statement" className="font-medium text-red-600" />
+                  <span id="statement-count" className="text-xs text-[#4e6666] shrink-0 ml-auto">{field.value?.length ?? 0} / 1,000 characters</span>
+                </div>
               </FormItem>
             )} />
           </div>
@@ -295,8 +330,17 @@ function StepOne({
                       <FormLabel className="font-bold text-[#102f43]">
                         {name === "address" ? "Street address" : "City"} <span className="text-red-600">*</span>
                       </FormLabel>
-                      <FormControl><Input className={inputClass} autoComplete={name === "address" ? "street-address" : "address-level2"} {...field} /></FormControl>
-                      <FormMessage className="font-medium text-red-600" />
+                      <FormControl>
+                        <Input 
+                          className={inputClass} 
+                          autoComplete={name === "address" ? "street-address" : "address-level2"} 
+                          maxLength={name === "address" ? 200 : 100}
+                          aria-invalid={!!form.formState.errors[name]}
+                          aria-describedby={form.formState.errors[name] ? `err-${name}` : undefined}
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage id={`err-${name}`} className="font-medium text-red-600" />
                     </FormItem>
                   )}
                 />
@@ -307,8 +351,19 @@ function StepOne({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-bold text-[#102f43]">State or region <span className="text-red-600">*</span></FormLabel>
-                    <FormControl><Input className={inputClass} autoComplete="address-level1" {...field} /></FormControl>
-                    <FormMessage className="font-medium text-red-600" />
+                    <FormControl>
+                      <Input 
+                        className={inputClass} 
+                        autoComplete="address-level1" 
+                        maxLength={2}
+                        placeholder="e.g. CA"
+                        aria-invalid={!!form.formState.errors.state}
+                        aria-describedby={form.formState.errors.state ? "err-state" : undefined}
+                        {...field} 
+                        onChange={e => field.onChange(e.target.value.toUpperCase())}
+                      />
+                    </FormControl>
+                    <FormMessage id="err-state" className="font-medium text-red-600" />
                   </FormItem>
                 )}
               />
@@ -318,8 +373,18 @@ function StepOne({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-bold text-[#102f43]">ZIP or postal code <span className="text-red-600">*</span></FormLabel>
-                    <FormControl><Input className={inputClass} autoComplete="postal-code" {...field} /></FormControl>
-                    <FormMessage className="font-medium text-red-600" />
+                    <FormControl>
+                      <Input 
+                        className={inputClass} 
+                        autoComplete="postal-code" 
+                        inputMode="numeric"
+                        maxLength={10}
+                        aria-invalid={!!form.formState.errors.zip}
+                        aria-describedby={form.formState.errors.zip ? "err-zip" : undefined}
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage id="err-zip" className="font-medium text-red-600" />
                   </FormItem>
                 )}
               />
@@ -370,12 +435,14 @@ function maskDigits(digits: string) {
 }
 
 function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; onBack: () => void }) {
+  const { card } = useAuthorizationSession();
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
-  const [cardholderName, setCardholderName] = useState("");
+  const [cardholderName, setCardholderName] = useState(card?.cardholderName || "");
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const [error, setError] = useState("");
+  
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const clearTransientCardValues = () => {
     setCardNumber("");
@@ -385,7 +452,13 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
 
   const validateAndContinue = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const newErrors: Record<string, string> = {};
     const digits = cardNumber.replace(/\D/g, "");
+    
+    if (digits.length < 13 || digits.length > 19 || !passesLuhn(digits)) {
+      newErrors.number = "Enter a valid card number.";
+    }
+
     const [monthText, yearText] = expiry.split("/");
     const month = Number(monthText);
     const year = Number(`20${yearText}`);
@@ -396,21 +469,26 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
       month <= 12 &&
       year >= now.getFullYear() &&
       (year > now.getFullYear() || month >= now.getMonth() + 1);
-    const requiredCvvLength = detectCardBrand(digits) === "American Express" ? 4 : 3;
-    if (digits.length < 13 || digits.length > 19 || !passesLuhn(digits)) {
-      setError("Enter a valid card number. Numbers are checked locally in this browser only.");
-      return;
-    }
+      
     if (!validExpiry) {
-      setError("Enter a valid future expiry date in MM/YY format.");
-      return;
+      newErrors.expiry = "Enter a valid future expiry date (MM/YY).";
     }
+
+    const requiredCvvLength = detectCardBrand(digits) === "American Express" ? 4 : 3;
     if (cvv.length !== requiredCvvLength) {
-      setError(`Enter the ${requiredCvvLength}-digit security code.`);
-      return;
+      newErrors.cvv = `Enter the ${requiredCvvLength}-digit security code.`;
     }
+
     if (!cardholderName.trim()) {
-      setError("Cardholder name is required.");
+      newErrors.name = "Cardholder name is required.";
+    } else if (cardholderName.trim().length < 2 || !personNamePattern.test(cardholderName.trim())) {
+      newErrors.name = "Enter a valid cardholder name.";
+    } else if (cardholderName.trim().length > 100) {
+      newErrors.name = "Name is too long.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -426,7 +504,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
 
   const focusAndClearError = (field: string) => {
     setFocusedField(field);
-    setError("");
+    setErrors(prev => ({ ...prev, [field]: "" }));
   };
   const inputClass = "h-11 border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#c39b4a]/20 font-mono";
 
@@ -450,21 +528,25 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
           <label htmlFor="card-number" className="block text-sm font-bold">Card number <span className="text-red-600">*</span></label>
           <Input
             id="card-number"
-            type={focusedField === "number" ? "text" : "text"}
+            type="text"
             inputMode="numeric"
-            autoComplete="off"
+            autoComplete="cc-number"
             data-form-type="other"
             maxLength={23}
-            className={inputClass}
+            className={`${inputClass} ${errors.number ? 'border-[#b84635] focus:ring-[#b84635]' : ''}`}
             value={focusedField === "number" ? cardNumber.replace(/(.{4})/g, "$1 ").trim() : maskCardNumber(cardNumber)}
             onFocus={() => focusAndClearError("number")}
             onBlur={() => setFocusedField(null)}
             onChange={(event) => setCardNumber(event.target.value.replace(/\D/g, "").slice(0, 19))}
-            aria-describedby="card-number-description"
+            aria-invalid={!!errors.number}
+            aria-describedby={`card-number-description ${errors.number ? 'err-card-number' : ''}`}
           />
-          <p id="card-number-description" className="text-xs text-[#4e6666]">
-            {focusedField === "number" ? "Card number is revealed while this field is focused." : "Card number is masked when this field is not focused."}
-          </p>
+          <div className="flex flex-col mt-1.5 gap-1">
+            <FieldError error={errors.number} id="err-card-number" />
+            <p id="card-number-description" className="text-xs text-[#4e6666]">
+              {focusedField === "number" ? "Card number is revealed while this field is focused." : "Card number is masked when this field is not focused."}
+            </p>
+          </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-6">
           <div className="space-y-2">
@@ -473,10 +555,10 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
               id="card-expiry"
               type="text"
               inputMode="numeric"
-              autoComplete="off"
+              autoComplete="cc-exp"
               data-form-type="other"
               maxLength={5}
-              className={inputClass}
+              className={`${inputClass} ${errors.expiry ? 'border-[#b84635] focus:ring-[#b84635]' : ''}`}
               placeholder="MM/YY"
               value={focusedField === "expiry" ? expiry : maskDigits(expiry.replace(/\D/g, ""))}
               onFocus={() => focusAndClearError("expiry")}
@@ -485,11 +567,15 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
                 const digits = event.target.value.replace(/\D/g, "").slice(0, 4);
                 setExpiry(digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits);
               }}
-              aria-describedby="card-expiry-description"
+              aria-invalid={!!errors.expiry}
+              aria-describedby={`card-expiry-description ${errors.expiry ? 'err-card-expiry' : ''}`}
             />
-            <p id="card-expiry-description" className="text-xs text-[#4e6666]">
-              {focusedField === "expiry" ? "Expiry date is revealed while this field is focused." : "Expiry date is masked when this field is not focused."}
-            </p>
+            <div className="flex flex-col mt-1.5 gap-1">
+              <FieldError error={errors.expiry} id="err-card-expiry" />
+              <p id="card-expiry-description" className="text-xs text-[#4e6666]">
+                {focusedField === "expiry" ? "Expiry date is revealed while this field is focused." : "Expiry date is masked when this field is not focused."}
+              </p>
+            </div>
           </div>
           <div className="space-y-2">
             <label htmlFor="card-cvv" className="block text-sm font-bold">Security code <span className="text-red-600">*</span></label>
@@ -497,36 +583,43 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
               id="card-cvv"
               type="text"
               inputMode="numeric"
-              autoComplete="off"
+              autoComplete="cc-csc"
               data-form-type="other"
               maxLength={4}
-              className={inputClass}
+              className={`${inputClass} ${errors.cvv ? 'border-[#b84635] focus:ring-[#b84635]' : ''}`}
               placeholder="CVV"
               value={focusedField === "cvv" ? cvv : maskDigits(cvv)}
               onFocus={() => focusAndClearError("cvv")}
               onBlur={() => setFocusedField(null)}
               onChange={(event) => setCvv(event.target.value.replace(/\D/g, "").slice(0, 4))}
-              aria-describedby="card-cvv-description"
+              aria-invalid={!!errors.cvv}
+              aria-describedby={`card-cvv-description ${errors.cvv ? 'err-card-cvv' : ''}`}
             />
-            <p id="card-cvv-description" className="text-xs text-[#4e6666]">
-              {focusedField === "cvv" ? "Security code is revealed while this field is focused." : "Security code is masked when this field is not focused."}
-            </p>
+            <div className="flex flex-col mt-1.5 gap-1">
+              <FieldError error={errors.cvv} id="err-card-cvv" />
+              <p id="card-cvv-description" className="text-xs text-[#4e6666]">
+                {focusedField === "cvv" ? "Security code is revealed while this field is focused." : "Security code is masked when this field is not focused."}
+              </p>
+            </div>
           </div>
         </div>
         <div className="space-y-2">
           <label htmlFor="cardholder-name" className="block text-sm font-bold">Cardholder name <span className="text-red-600">*</span></label>
           <Input
             id="cardholder-name"
-            autoComplete="off"
-            className="h-11 border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#005ea2]/20"
+            autoComplete="cc-name"
+            maxLength={100}
+            className={`h-11 border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#005ea2]/20 ${errors.name ? 'border-[#b84635] focus:ring-[#b84635]' : ''}`}
             value={cardholderName}
             onChange={(event) => {
               setCardholderName(event.target.value);
-              setError("");
+              setErrors(prev => ({ ...prev, name: "" }));
             }}
+            aria-invalid={!!errors.name}
+            aria-describedby={errors.name ? 'err-card-name' : undefined}
           />
+          <FieldError error={errors.name} id="err-card-name" />
         </div>
-        {error && <p role="alert" className="text-sm font-semibold text-red-700">{error}</p>}
         <p className="text-xs text-[#4e6666] flex items-start gap-2">
           <CreditCard className="h-4 w-4 shrink-0 mt-0.5" />
           This is a standalone authorization document, not a charge or a saved payment method.
@@ -557,16 +650,14 @@ function StepThree({
   onNext: () => void;
   onBack: () => void;
 }) {
-  const { toast } = useToast();
+  const [error, setError] = useState("");
+
   const handleNext = () => {
     if (!accepted) {
-      toast({
-        title: "Acceptance required",
-        description: "Read and accept the exact agreement before continuing.",
-        variant: "destructive",
-      });
+      setError("Read and accept the exact agreement before continuing.");
       return;
     }
+    setError("");
     onNext();
   };
 
@@ -590,18 +681,26 @@ function StepThree({
             {config.termsText}
           </div>
         </div>
-        <label className="flex items-start gap-4 p-5 border-2 border-[#17364a]/25 rounded bg-[#f4f3ee] hover:bg-[#eef1eb] cursor-pointer transition-colors">
-          <Checkbox
-            checked={accepted}
-            onCheckedChange={(checked) => setAccepted(!!checked)}
-            className="mt-1 w-5 h-5 border-2 border-[#c39b4a] data-[state=checked]:bg-[#17364a]"
-            aria-label="Accept exact agreement"
-          />
-          <div className="text-sm text-[#102f43] font-medium leading-relaxed">
-            <strong className="block mb-1 text-base">I have read and accept this exact agreement</strong>
-            I understand this browser-generated document records my acknowledgement and typed signature. It is not a payment or server-submitted record.
-          </div>
-        </label>
+        <div className="space-y-1.5">
+          <label className={`flex items-start gap-4 p-5 border-2 ${error ? 'border-[#b84635]' : 'border-[#17364a]/25'} rounded bg-[#f4f3ee] hover:bg-[#eef1eb] cursor-pointer transition-colors`}>
+            <Checkbox
+              checked={accepted}
+              onCheckedChange={(checked) => {
+                setAccepted(!!checked);
+                if (checked) setError("");
+              }}
+              className={`mt-1 w-5 h-5 border-2 ${error ? 'border-[#b84635]' : 'border-[#c39b4a]'} data-[state=checked]:bg-[#17364a]`}
+              aria-label="Accept exact agreement"
+              aria-invalid={!!error}
+              aria-describedby={error ? "err-agreement" : undefined}
+            />
+            <div className="text-sm text-[#102f43] font-medium leading-relaxed">
+              <strong className="block mb-1 text-base">I have read and accept this exact agreement</strong>
+              I understand this browser-generated document records my acknowledgement and typed signature. It is not a payment or server-submitted record.
+            </div>
+          </label>
+          <FieldError error={error} id="err-agreement" />
+        </div>
       </div>
       <StepActions>
         <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
@@ -617,10 +716,33 @@ function StepThree({
 
 function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => void; onBack: () => void }) {
   const [signatureName, setSignatureName] = useState("");
+  const [error, setError] = useState("");
+  const [touched, setTouched] = useState(false);
+
+  const validate = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "Signature is required.";
+    if (trimmed.length < 2) return "Enter at least 2 characters.";
+    if (trimmed.length > 100) return "Signature is too long.";
+    if (!personNamePattern.test(trimmed)) return "Type your full name using letters.";
+    return "";
+  };
+
+  const handleBlur = () => {
+    setTouched(true);
+    setError(validate(signatureName));
+  };
+
   return (
     <form onSubmit={(event) => {
       event.preventDefault();
-      if (signatureName.trim()) onSubmit(signatureName);
+      const err = validate(signatureName);
+      if (err) {
+        setTouched(true);
+        setError(err);
+      } else {
+        onSubmit(signatureName);
+      }
     }}>
       <StepHeader
         title="4. Add your signature"
@@ -634,19 +756,28 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => v
           </p>
         </div>
         <div className="max-w-md space-y-4">
-          <label htmlFor="signature" className="font-bold text-[#102f43] block">
-            Type your full name <span className="text-red-600">*</span>
-          </label>
-          <Input
-            id="signature"
-            value={signatureName}
-            onChange={(event) => setSignatureName(event.target.value)}
-            placeholder="e.g. Jane Doe"
-            required
-            className="h-14 font-bold text-xl border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#c39b4a]/20"
-            autoComplete="off"
-            spellCheck="false"
-          />
+          <div>
+            <label htmlFor="signature" className="font-bold text-[#102f43] block mb-2">
+              Type your full name <span className="text-red-600">*</span>
+            </label>
+            <Input
+              id="signature"
+              value={signatureName}
+              onChange={(event) => {
+                setSignatureName(event.target.value);
+                if (touched) setError(validate(event.target.value));
+              }}
+              onBlur={handleBlur}
+              placeholder="e.g. Jane Doe"
+              maxLength={100}
+              className={`h-14 font-bold text-xl border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#c39b4a]/20 ${touched && error ? 'border-[#b84635] focus:ring-[#b84635]' : ''}`}
+              autoComplete="name"
+              spellCheck="false"
+              aria-invalid={!!(touched && error)}
+              aria-describedby={touched && error ? "err-signature" : undefined}
+            />
+            {touched && <FieldError error={error} id="err-signature" />}
+          </div>
           <p className="text-xs text-[#4e6666] font-medium">
             The date and time shown on the completed document come from this browser and are not server verified.
           </p>
@@ -656,7 +787,7 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => v
         <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
           <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
-        <Button type="submit" size="lg" disabled={!signatureName.trim()} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
+        <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
           <Check className="mr-3 h-5 w-5" /> Complete document
         </Button>
       </StepActions>

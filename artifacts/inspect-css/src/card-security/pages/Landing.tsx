@@ -3,7 +3,6 @@ import { ArrowRight, ShieldCheck, FileText, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthorizationSession } from "@/card-security/lib/authorization-session";
 import { SharedLayout } from "../components/Layout";
-import { Link } from "wouter";
 
 export default function Landing() {
   const [, setLocation] = useAppLocation();
@@ -38,6 +37,19 @@ export default function Landing() {
                     You will enter billing information, full card details, and a signature. Full card details are temporary and cleared before the document is completed. Nothing is submitted to an API or saved in a vault, and this is not a charge.
                   </p>
                 </div>
+              </div>
+
+              <div className="bg-[#f8f7f2] border-2 border-[#17364a] p-5 text-[#102f43] mb-8 shadow-[4px_4px_0_#17364a]">
+                <h3 className="font-bold text-base mb-1 flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-[#17364a]" />
+                  Suspecting fraud or a scam?
+                </h3>
+                <p className="text-sm leading-relaxed text-[#4e6666] mb-3">
+                  This tool is for authorizing legitimate transactions. If you believe your card has been compromised or you are documenting a scam, use our dedicated fraud reporting tool instead.
+                </p>
+                <a href={`${import.meta.env.BASE_URL}report-fraud`} className="text-sm font-bold text-[#17364a] hover:text-[#9a6f20] inline-flex items-center gap-1 transition-colors">
+                  Go to Report a Fraud <ArrowRight className="w-4 h-4" />
+                </a>
               </div>
 
               <div className="space-y-4 mb-10">

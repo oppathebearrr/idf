@@ -93,6 +93,7 @@ The Security Inspection platform provides public-service cybersecurity tools:
    - Local text presets and reusable blocks
 2. **Card Security**: A local-only secure document generator for card authorizations without transmitting sensitive data.
 3. **IP Lookup**: A quick external tool link for investigating suspicious IPs.
+4. **Report a Fraud**: A local-only privacy-first wizard for organizing fraud incidents and generating PDF summaries.
 
 ## Extension installation
 
@@ -120,6 +121,12 @@ Do not try to inspect `chrome://` pages, the Chrome Web Store, or other browser-
 - `artifacts/inspect-css/.replit-artifact/artifact.toml` — artifact routing and production settings
 ## Card Security Integration
 
+The site also includes the Report a Fraud module hosted under the `/report-fraud` path.
+- **Workflow**: 5-step wizard (Incident -> Narrative -> Financial Impact -> Evidence -> Review -> Confirmation).
+- **Features**: Generates a PDF incident summary in the browser locally for use when disputing charges or making official reports.
+- **Architecture**: No backend API, no actual submissions. Data is kept in-memory and discarded.
+- **Where it lives**: `artifacts/inspect-css/src/report-fraud/` with its own nested Wouter router.
+
 The site now includes the Card Security module hosted under the `/card-security` path. It is a local-only card authorization document generator.
 - **Workflow**: 4-step authorization form (Contact -> Temporary Card -> Agreement -> Signature -> Confirmation).
 - **Features**: Generates a PDF in the browser with card details masked (brand & last four digits only).
@@ -127,3 +134,11 @@ The site now includes the Card Security module hosted under the `/card-security`
 - **Where it lives**: `artifacts/inspect-css/src/card-security/` with its own Wouter nested router `CardSecurityApp.tsx`.
 - **Config**: Edit `artifacts/inspect-css/src/card-security/config.ts` to update the business name, logo, or policies.
 - **Theme**: Re-styled to match the Security Inspection (navy/gold/ivory) aesthetic rather than its original blue/slate theme.
+
+## Report a Fraud Integration
+
+The site also includes the Report a Fraud module hosted under the `/report-fraud` path.
+- **Workflow**: 5-step wizard (Incident -> Narrative -> Financial Impact -> Evidence -> Review -> Confirmation).
+- **Features**: Generates a PDF incident summary in the browser locally for use when disputing charges or making official reports.
+- **Architecture**: No backend API, no actual submissions. Data is kept in-memory and discarded upon completion/exit.
+- **Where it lives**: `artifacts/inspect-css/src/report-fraud/` with its own nested Wouter router `ReportFraudApp.tsx`.

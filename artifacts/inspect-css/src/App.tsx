@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   CreditCard,
   GlobeLock,
+  AlertTriangle,
 } from 'lucide-react';
 import {
   Route,
@@ -27,6 +28,7 @@ import {
   Router as WouterRouter,
 } from 'wouter';
 import CardSecurityApp from '@/card-security/CardSecurityApp';
+import ReportFraudApp from '@/report-fraud/ReportFraudApp';
 
 const queryClient = new QueryClient();
 const HOME_URL = import.meta.env.BASE_URL;
@@ -88,6 +90,7 @@ function Home() {
           <nav className="hidden items-center gap-7 text-sm font-semibold text-[#17364a] md:flex" aria-label="Main navigation">
             <a href="#extension" className="outline-focus transition-colors hover:text-[#9a6f20]">Browser Extension</a>
             <Link href="/card-security" className="outline-focus transition-colors hover:text-[#9a6f20]">Card Security</Link>
+            <Link href="/report-fraud" className="outline-focus transition-colors hover:text-[#9a6f20]">Report Fraud</Link>
             <a href="https://microsoft--proipscanner.replit.app/" target="_blank" rel="noopener noreferrer" className="outline-focus transition-colors hover:text-[#9a6f20] inline-flex items-center gap-1">
               IP Lookup <ExternalLink size={14} />
             </a>
@@ -113,14 +116,21 @@ function Home() {
             <p className="hero-reveal hero-reveal-delay-2 mt-8 max-w-[700px] text-lg leading-8 text-[#4e6666] sm:text-xl">
               Security Inspection provides public-service tools to help you identify scams, verify suspicious websites, and secure your personal information across the internet.
             </p>
-            <div className="hero-reveal hero-reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="hero-reveal hero-reveal-delay-3 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row flex-wrap">
               <a
                 href="#extension"
                 className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#17364a] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#e4bd62] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
               >
                 <ScanLine size={18} />
-                Get Browser Extension
+                Browser Extension
               </a>
+              <Link
+                href="/report-fraud"
+                className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
+              >
+                <AlertTriangle size={18} />
+                Report a Fraud
+              </Link>
               <Link
                 href="/card-security"
                 className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
@@ -128,38 +138,35 @@ function Home() {
                 <CreditCard size={18} />
                 Card Security Tool
               </Link>
-              <a
-                href="https://microsoft--proipscanner.replit.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
-              >
-                <GlobeLock size={18} />
-                IP Lookup
-                <ExternalLink size={14} aria-hidden="true" />
-              </a>
             </div>
             
-            <div className="hero-reveal hero-reveal-delay-3 mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-[1000px]">
-              <div className="bg-white border border-[#17364a]/15 p-5 shadow-sm text-left flex items-start gap-4">
-                <div className="bg-[#eef1eb] p-3 rounded-full shrink-0"><ShieldCheck className="text-[#17364a] w-6 h-6" /></div>
+            <div className="hero-reveal hero-reveal-delay-3 mt-16 grid grid-cols-1 md:grid-cols-4 gap-4 w-full max-w-[1200px]">
+              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
+                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><ShieldCheck className="text-[#17364a] w-5 h-5" /></div>
                 <div>
-                  <h3 className="font-bold text-[#102f43]">Identify Scams</h3>
-                  <p className="text-sm text-[#4e6666] mt-1">Tools to inspect unsafe websites and recognize phishing attempts.</p>
+                  <h3 className="font-bold text-[#102f43] text-sm">Identify Scams</h3>
+                  <p className="text-xs text-[#4e6666] mt-1">Tools to inspect unsafe websites and recognize phishing.</p>
                 </div>
               </div>
-              <div className="bg-white border border-[#17364a]/15 p-5 shadow-sm text-left flex items-start gap-4">
-                <div className="bg-[#eef1eb] p-3 rounded-full shrink-0"><Lock className="text-[#17364a] w-6 h-6" /></div>
+              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
+                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><AlertTriangle className="text-[#17364a] w-5 h-5" /></div>
                 <div>
-                  <h3 className="font-bold text-[#102f43]">Protect Data</h3>
-                  <p className="text-sm text-[#4e6666] mt-1">Generate secure, localized documents without transmitting sensitive info.</p>
+                  <h3 className="font-bold text-[#102f43] text-sm">Document Fraud</h3>
+                  <p className="text-xs text-[#4e6666] mt-1">Organize incident details safely before disputing charges.</p>
                 </div>
               </div>
-              <div className="bg-white border border-[#17364a]/15 p-5 shadow-sm text-left flex items-start gap-4">
-                <div className="bg-[#eef1eb] p-3 rounded-full shrink-0"><GlobeLock className="text-[#17364a] w-6 h-6" /></div>
+              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
+                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><Lock className="text-[#17364a] w-5 h-5" /></div>
                 <div>
-                  <h3 className="font-bold text-[#102f43]">Investigate Threats</h3>
-                  <p className="text-sm text-[#4e6666] mt-1">Look up suspicious IPs and network sources to stay informed.</p>
+                  <h3 className="font-bold text-[#102f43] text-sm">Protect Data</h3>
+                  <p className="text-xs text-[#4e6666] mt-1">Generate secure local documents with zero data transmission.</p>
+                </div>
+              </div>
+              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
+                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><GlobeLock className="text-[#17364a] w-5 h-5" /></div>
+                <div>
+                  <h3 className="font-bold text-[#102f43] text-sm">Track Sources</h3>
+                  <p className="text-xs text-[#4e6666] mt-1">Look up suspicious IPs and networks with our partner tool.</p>
                 </div>
               </div>
             </div>
@@ -321,6 +328,9 @@ function Router() {
       <Switch>
         <Route path="/card-security" nest>
           <CardSecurityApp />
+        </Route>
+        <Route path="/report-fraud" nest>
+          <ReportFraudApp />
         </Route>
         <Route path="/" component={Home} />
         <Route component={NotFound} />
