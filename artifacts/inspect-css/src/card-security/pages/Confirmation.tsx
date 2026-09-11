@@ -1,9 +1,11 @@
 import { useEffect } from "react";
 import { useAppLocation } from "@/card-security/lib/router";
-import { AlertTriangle, Building2, CheckCircle, Download, FileText, Info, Printer, RotateCcw } from "lucide-react";
+import { AlertTriangle, CheckCircle, Download, FileText, Info, Printer, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { browserDateTime, downloadAuthorizationPdf } from "@/card-security/lib/browser-document";
 import { useAuthorizationSession } from "@/card-security/lib/authorization-session";
+import { SharedLayout } from "../components/Layout";
+import { Link } from "wouter";
 
 export default function Confirmation() {
   const [, setLocation] = useAppLocation();
@@ -20,46 +22,42 @@ export default function Confirmation() {
 
   if (!completed) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-[#f4f3ee] p-4">
-        <div className="max-w-md w-full border-2 border-[#17364a]/25 bg-[#f8f7f2] p-8 rounded shadow-sm text-center">
-          <AlertTriangle className="h-12 w-12 mx-auto text-[#17364a]mber-600 mb-4" />
-          <h1 className="text-[#17364a]xl font-bold text-[#102f43] mb-2">Browser session ended</h1>
-          <p className="text-[#4e6666] text-sm font-medium mb-8 leading-relaxed">
-            This document existed only in the previous browser session. A refresh, closed tab, or new session clears it. No server record can restore it.
-          </p>
-          <Button onClick={startNew} className="bg-[#17364a] hover:bg-[#17364a]/90 text-white font-bold h-12 px-6 rounded shadow-sm w-full">
-            <RotateCcw className="mr-2 h-4 w-4" /> Start a new document
-          </Button>
+      <SharedLayout>
+        <div className="flex-1 w-full flex items-center justify-center p-4">
+          <div className="max-w-md w-full border border-[#17364a]/25 bg-[#f8f7f2] p-8 shadow-[8px_8px_0_rgba(23,54,74,0.05)] text-center">
+            <AlertTriangle className="h-12 w-12 mx-auto text-[#b84635] mb-4" />
+            <h1 className="display-font text-2xl font-bold text-[#102f43] mb-2">Browser session ended</h1>
+            <p className="text-[#4e6666] text-sm font-medium mb-8 leading-relaxed">
+              This document existed only in the previous browser session. A refresh, closed tab, or new session clears it. No server record can restore it.
+            </p>
+            <Button onClick={startNew} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-6 rounded-md shadow-[5px_5px_0_#c39b4a] w-full transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
+              <RotateCcw className="mr-2 h-4 w-4" /> Start a new document
+            </Button>
+          </div>
         </div>
-      </div>
+      </SharedLayout>
     );
   }
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#f4f3ee] font-sans selection:bg-[#17364a] selection:text-white">
-      <div className="no-print bg-[#17364a] text-white py-1.5 px-4 text-xs font-medium border-b-4 border-[#c39b4a]">
-        <div className="max-w-4xl mx-auto flex items-center gap-2">
-          <CheckCircle className="w-4 h-4 text-[#17364a]merald-300" />
-          <span>Document completed in this browser. Nothing was submitted.</span>
-        </div>
-      </div>
-      <header className="no-print bg-[#f8f7f2] border-b border-[#17364a]/25 py-4 px-4 shadow-sm">
-        <div className="max-w-4xl mx-auto flex items-center gap-4">
-          <div className="w-8 h-8 bg-[#17364a] text-white flex items-center justify-center font-bold rounded-sm shadow-sm text-sm">
-            <Building2 className="w-4 h-4" />
-          </div>
-          <span className="font-bold text-lg text-[#102f43] tracking-tight">{completed.businessName}</span>
-        </div>
-      </header>
+    <SharedLayout>
+      <div className="inspect-container py-12 flex-1 relative z-10">
+        {/* Breadcrumbs */}
+        <nav className="text-sm font-medium text-[#4e6666] mb-8 flex items-center gap-2 no-print">
+          <Link href="/" className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</Link>
+          <span className="text-[#17364a]/30">›</span>
+          <button onClick={() => setLocation("/")} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Card Security</button>
+          <span className="text-[#17364a]/30">›</span>
+          <span className="text-[#17364a]">Create Document</span>
+        </nav>
 
-      <main className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-8">
         <div className="no-print mb-8">
           <div className="flex items-center gap-3 mb-4 text-[#17364a] font-bold tracking-tight uppercase text-sm">
             <CheckCircle className="w-6 h-6 text-green-600" />
             <span className="text-green-700">Document complete</span>
           </div>
           <h1 className="text-3xl font-bold text-[#102f43] mb-2">Your authorization document is ready</h1>
-          <p className="text-lg text-slate-700 font-medium">
+          <p className="text-lg text-[#4e6666] font-medium">
             Download the PDF or print it now. Keep a copy for your records.
           </p>
         </div>
@@ -128,7 +126,7 @@ export default function Confirmation() {
               </dl>
               <div className="border border-[#17364a]/15 rounded bg-[#f4f3ee] p-5">
                 <h3 className="font-bold text-[#102f43] mb-3">Exact agreement accepted</h3>
-                <p className="text-sm text-slate-800 leading-relaxed whitespace-pre-wrap">{completed.agreement.termsText}</p>
+                <p className="text-sm text-[#102f43] leading-relaxed whitespace-pre-wrap">{completed.agreement.termsText}</p>
               </div>
             </section>
 
@@ -141,13 +139,13 @@ export default function Confirmation() {
         <div className="no-print mt-6 flex flex-col sm:flex-row gap-4">
           <Button
             onClick={() => downloadAuthorizationPdf(completed)}
-            className="flex-1 bg-[#17364a] hover:bg-[#17364a]/90 text-white font-bold h-12 rounded shadow-sm flex items-center justify-center"
+            className="flex-1 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 rounded-md shadow-[5px_5px_0_#c39b4a] flex items-center justify-center transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]"
           >
             <Download className="mr-2 h-5 w-5" /> Download PDF
           </Button>
           <Button
             onClick={() => window.print()}
-            className="flex-1 bg-[#f8f7f2] hover:bg-slate-100 text-[#17364a] border-2 border-[#c39b4a] font-bold h-12 rounded flex items-center justify-center shadow-sm"
+            className="flex-1 bg-[#f8f7f2] hover:bg-[#eef1eb] text-[#17364a] border-2 border-[#17364a] font-extrabold uppercase tracking-[.05em] h-12 rounded-md flex items-center justify-center shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a]"
           >
             <Printer className="mr-2 h-5 w-5" /> Print
           </Button>
@@ -157,8 +155,8 @@ export default function Confirmation() {
             <RotateCcw className="mr-2 h-4 w-4" /> Start a new document
           </Button>
         </div>
-      </main>
-    </div>
+      </div>
+    </SharedLayout>
   );
 }
 

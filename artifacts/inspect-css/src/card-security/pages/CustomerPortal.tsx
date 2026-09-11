@@ -10,7 +10,6 @@ import {
   Check,
   ChevronRight,
   CreditCard,
-  Building2,
   FileText,
   Info,
   ShieldCheck,
@@ -55,6 +54,9 @@ function makeReferenceId() {
       : Math.random().toString(36).slice(2, 14);
   return `LOCAL-${random.toUpperCase()}`;
 }
+
+import { SharedLayout } from "../components/Layout";
+import { Link } from "wouter";
 
 export default function CustomerPortal() {
   const config = DEFAULT_BUSINESS_CONFIG;
@@ -103,38 +105,17 @@ export default function CustomerPortal() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#f4f3ee] font-sans selection:bg-[#17364a] selection:text-white">
-      <div className="bg-[#17364a] text-white py-1.5 px-4 text-xs font-medium border-b-4 border-[#c39b4a]">
-        <div className="max-w-4xl mx-auto flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-white/80" />
-          <span>Private authorization document service for {config.businessName}.</span>
-        </div>
-      </div>
+    <SharedLayout>
+      <div className="inspect-container py-12 flex-1">
+        {/* Breadcrumbs */}
+        <nav className="text-sm font-medium text-[#4e6666] mb-8 flex items-center gap-2">
+          <Link href="/" className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Security Inspection</Link>
+          <span className="text-[#17364a]/30">›</span>
+          <button onClick={() => setLocation("/")} className="text-[#102f43] hover:text-[#9a6f20] transition-colors">Card Security</button>
+          <span className="text-[#17364a]/30">›</span>
+          <span className="text-[#17364a]">Create Document</span>
+        </nav>
 
-      <header className="bg-[#f8f7f2] border-b border-[#17364a]/25 py-4 px-4 shadow-sm">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <button
-            type="button"
-            className="flex items-center gap-4 text-left"
-            onClick={() => setLocation("/")}
-            aria-label={`Return to ${config.businessName} home`}
-          >
-            {config.logoUrl ? (
-              <img src={config.logoUrl} alt={config.businessName} className="h-8 object-contain" />
-            ) : (
-              <div className="w-8 h-8 bg-[#17364a] text-white flex items-center justify-center font-bold rounded-sm shadow-sm text-sm">
-                <Building2 className="w-4 h-4" />
-              </div>
-            )}
-            <span className="font-bold text-lg text-[#102f43] tracking-tight">{config.businessName}</span>
-          </button>
-          <div className="text-sm font-bold text-[#4e6666] bg-slate-100 px-3 py-1 border border-[#17364a]/15 rounded">
-            Browser-only document
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-8">
         <div className="mb-8 border-b-2 border-[#17364a]/15 pb-6 animate-fade-in">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
@@ -145,8 +126,8 @@ export default function CustomerPortal() {
             </div>
             <div className="flex items-center gap-2 text-sm font-bold text-[#17364a]">
               <span>Step {step} of {STEPS.length}</span>
-              <span className="text-slate-400 font-normal hidden sm:inline">—</span>
-              <span className="text-slate-700 hidden sm:inline">{STEPS[step - 1].name}</span>
+              <span className="text-[#4e6666]/50 font-normal hidden sm:inline">—</span>
+              <span className="text-[#4e6666] hidden sm:inline">{STEPS[step - 1].name}</span>
             </div>
           </div>
 
@@ -156,8 +137,8 @@ export default function CustomerPortal() {
               const isCurrent = step === currentStep.id;
               return (
                 <div key={currentStep.id} className="flex-1 flex flex-col gap-2">
-                  <div className={`h-2 w-full rounded-sm ${isCompleted || isCurrent ? "bg-[#17364a]" : "bg-slate-200"}`} />
-                  <span className={`text-xs font-bold uppercase tracking-wider hidden sm:block ${isCurrent ? "text-[#102f43]" : isCompleted ? "text-[#17364a]" : "text-slate-400"}`}>
+                  <div className={`h-2 w-full rounded-sm ${isCompleted || isCurrent ? "bg-[#17364a]" : "bg-[#eef1eb]"}`} />
+                  <span className={`text-xs font-bold uppercase tracking-wider hidden sm:block ${isCurrent ? "text-[#102f43]" : isCompleted ? "text-[#17364a]" : "text-[#4e6666]/50"}`}>
                     {currentStep.name}
                   </span>
                 </div>
@@ -208,8 +189,8 @@ export default function CustomerPortal() {
             />
           )}
         </div>
-      </main>
-    </div>
+      </div>
+    </SharedLayout>
   );
 }
 
@@ -236,7 +217,7 @@ function StepOne({
     },
   });
 
-  const inputClass = "h-11 border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#005ea2]/20";
+  const inputClass = "h-11 border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#c39b4a]/20";
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onNext)}>
@@ -294,7 +275,7 @@ function StepOne({
                 <FormLabel className="text-lg font-bold text-[#102f43]">Personal statement (optional)</FormLabel>
                 <p id="statement-help" className="text-sm text-[#4e6666]">Write a short statement to include with your authorization. Do not include card numbers or security codes.</p>
                 <FormControl>
-                  <textarea {...field} value={field.value ?? ""} rows={4} maxLength={1000} aria-describedby="statement-help statement-count" placeholder="Write your personal statement here…" className="w-full rounded border-2 border-[#17364a]/25 bg-[#f8f7f2] p-3 text-base focus:border-[#c39b4a] focus:outline-none focus:ring-2 focus:ring-[#005ea2]/20" />
+                  <textarea {...field} value={field.value ?? ""} rows={4} maxLength={1000} aria-describedby="statement-help statement-count" placeholder="Write your personal statement here…" className="w-full rounded border-2 border-[#17364a]/25 bg-[#f8f7f2] p-3 text-base focus:border-[#c39b4a] focus:outline-none focus:ring-2 focus:ring-[#c39b4a]/20" />
                 </FormControl>
                 <p id="statement-count" className="text-xs text-[#4e6666]">{field.value?.length ?? 0} / 1,000 characters</p>
                 <FormMessage />
@@ -346,7 +327,7 @@ function StepOne({
           </div>
         </div>
         <StepActions>
-          <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#17364a]/90 text-white font-bold h-12 px-8 rounded shadow-sm text-base w-full sm:w-auto">
+          <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
             Continue <ChevronRight className="ml-2 w-5 h-5" />
           </Button>
         </StepActions>
@@ -447,7 +428,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
     setFocusedField(field);
     setError("");
   };
-  const inputClass = "h-11 border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#005ea2]/20 font-mono";
+  const inputClass = "h-11 border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#c39b4a]/20 font-mono";
 
   return (
     <form autoComplete="off" onSubmit={validateAndContinue}>
@@ -552,10 +533,10 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
         </p>
       </div>
       <StepActions>
-        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a]/25 text-slate-700 font-bold hover:bg-slate-100 w-full sm:w-auto">
+        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
           <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
-        <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#17364a]/90 text-white font-bold h-12 px-8 rounded shadow-sm text-base w-full sm:w-auto">
+        <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
           Continue <ChevronRight className="ml-2 w-5 h-5" />
         </Button>
       </StepActions>
@@ -597,7 +578,7 @@ function StepThree({
       />
       <div className="p-6 sm:p-8 space-y-6">
         <div className="border-2 border-[#17364a]/25 rounded bg-[#f8f7f2] overflow-hidden">
-          <div className="bg-slate-100 border-b-2 border-[#17364a]/25 px-4 py-2 flex items-center justify-between">
+          <div className="bg-[#eef1eb] border-b-2 border-[#17364a]/25 px-4 py-2 flex items-center justify-between">
             <span className="font-bold text-[#102f43] flex items-center gap-2 text-sm">
               <FileText className="w-4 h-4 text-[#17364a]" /> Exact agreement
             </span>
@@ -605,11 +586,11 @@ function StepThree({
               Version {config.termsVersion}
             </span>
           </div>
-          <div className="p-6 overflow-y-auto max-h-[360px] text-sm text-slate-800 font-medium leading-relaxed whitespace-pre-wrap">
+          <div className="p-6 overflow-y-auto max-h-[360px] text-sm text-[#102f43] font-medium leading-relaxed whitespace-pre-wrap">
             {config.termsText}
           </div>
         </div>
-        <label className="flex items-start gap-4 p-5 border-2 border-[#17364a]/25 rounded bg-[#f4f3ee] hover:bg-slate-100 cursor-pointer transition-colors">
+        <label className="flex items-start gap-4 p-5 border-2 border-[#17364a]/25 rounded bg-[#f4f3ee] hover:bg-[#eef1eb] cursor-pointer transition-colors">
           <Checkbox
             checked={accepted}
             onCheckedChange={(checked) => setAccepted(!!checked)}
@@ -623,10 +604,10 @@ function StepThree({
         </label>
       </div>
       <StepActions>
-        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a]/25 text-slate-700 font-bold hover:bg-slate-100 w-full sm:w-auto">
+        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
           <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
-        <Button onClick={handleNext} size="lg" className="bg-[#17364a] hover:bg-[#17364a]/90 text-white font-bold h-12 px-8 rounded shadow-sm text-base w-full sm:w-auto" disabled={!accepted}>
+        <Button onClick={handleNext} size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]" disabled={!accepted}>
           Proceed to sign <ChevronRight className="ml-2 w-5 h-5" />
         </Button>
       </StepActions>
@@ -662,7 +643,7 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => v
             onChange={(event) => setSignatureName(event.target.value)}
             placeholder="e.g. Jane Doe"
             required
-            className="h-14 font-bold text-xl border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#005ea2]/20"
+            className="h-14 font-bold text-xl border-2 border-[#17364a]/25 focus:border-[#c39b4a] focus:ring-[#c39b4a]/20"
             autoComplete="off"
             spellCheck="false"
           />
@@ -672,10 +653,10 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => v
         </div>
       </div>
       <StepActions>
-        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a]/25 text-slate-700 font-bold hover:bg-slate-100 w-full sm:w-auto">
+        <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
           <ArrowLeft className="mr-2 w-4 h-4" /> Previous
         </Button>
-        <Button type="submit" size="lg" disabled={!signatureName.trim()} className="bg-[#17364a] hover:bg-[#17364a]/90 text-white font-bold h-12 px-8 rounded shadow-sm text-base w-full sm:w-auto">
+        <Button type="submit" size="lg" disabled={!signatureName.trim()} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
           <Check className="mr-3 h-5 w-5" /> Complete document
         </Button>
       </StepActions>
