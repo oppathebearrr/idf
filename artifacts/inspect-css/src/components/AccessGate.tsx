@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { BadgeCheck, KeyRound, LockKeyhole, ShieldCheck } from 'lucide-react';
+import { Icon3D } from '@/components/Icon3D';
 
 const UNLOCK_URL = `${import.meta.env.BASE_URL}api/site-access/unlock`;
 const ACCESS_STATUS_URL = `${import.meta.env.BASE_URL}api/site-access/status`;
@@ -64,7 +64,7 @@ export function AccessGate({ children }: AccessGateProps) {
     return (
       <main className="grid min-h-[100dvh] place-items-center bg-[#102f43] text-[#d6b45d]">
         <div className="flex flex-col items-center gap-4" role="status">
-          <LockKeyhole className="h-8 w-8 animate-pulse" />
+          <Icon3D name="lock-keyhole" size={32} className="animate-pulse" />
           <span className="mono-label">Verifying access</span>
         </div>
       </main>
@@ -96,7 +96,7 @@ export function AccessGate({ children }: AccessGateProps) {
           </div>
 
           <div className="mt-9 inline-flex items-center gap-2 border border-[#d6b45d]/30 bg-[#17364a] px-4 py-2">
-            <BadgeCheck className="h-4 w-4 text-[#d6b45d]" />
+            <Icon3D name="badge-check" size={16} className="text-[#d6b45d]" />
             <span className="mono-label text-[#d6b45d]">Identity verified</span>
           </div>
 
@@ -204,11 +204,11 @@ export function AccessGate({ children }: AccessGateProps) {
 
             <div className="relative space-y-4 text-sm text-[#d9e3de]">
               <div className="flex items-center gap-3 border-t border-white/10 pt-5">
-                <ShieldCheck className="h-5 w-5 text-[#d6b45d]" />
+                <Icon3D name="shield-check" size={20} className="text-[#d6b45d]" />
                 <span>Credentials are verified securely</span>
               </div>
               <div className="flex items-center gap-3">
-                <BadgeCheck className="h-5 w-5 text-[#d6b45d]" />
+                <Icon3D name="badge-check" size={20} className="text-[#d6b45d]" />
                 <span>Access is remembered on this browser</span>
               </div>
             </div>
@@ -233,7 +233,7 @@ export function AccessGate({ children }: AccessGateProps) {
             </div>
 
             <div className="grid h-14 w-14 place-items-center border border-[#c39b4a]/60 bg-[#e2eadf] text-[#17364a]">
-              <LockKeyhole size={26} strokeWidth={1.8} />
+              <Icon3D name="lock-keyhole" size={26} />
             </div>
             <p className="mono-label mt-7 text-[#9a6f20]">Identity verification</p>
             <h2 className="display-font mt-3 text-3xl font-bold tracking-[-0.04em] sm:text-4xl">
@@ -302,7 +302,7 @@ export function AccessGate({ children }: AccessGateProps) {
                 disabled={isSubmitting}
                 className="outline-focus inline-flex min-h-14 w-full items-center justify-center gap-3 border-2 border-[#17364a] bg-[#17364a] px-6 text-sm font-extrabold uppercase tracking-[.07em] text-[#e4bd62] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 disabled:hover:translate-y-0"
               >
-                <KeyRound size={18} />
+                <Icon3D name="lock-keyhole" size={18} />
                 {isSubmitting ? 'Verifying access…' : 'Verify and continue'}
               </button>
             </form>

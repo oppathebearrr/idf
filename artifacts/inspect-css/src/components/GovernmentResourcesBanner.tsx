@@ -1,4 +1,4 @@
-import { ExternalLink, Landmark } from "lucide-react";
+import { Icon3D } from "@/components/Icon3D";
 
 type ResourceCategory = "fraud" | "finance" | "credit" | "law" | "federal";
 
@@ -198,7 +198,7 @@ function ResourceSet({ duplicate = false }: { duplicate?: boolean }) {
             <span className="gov-resource-category">{resource.categoryLabel}</span>
             <span className="gov-resource-name">
               {resource.name}
-              <ExternalLink size={12} aria-hidden="true" />
+              <Icon3D name="external-link" size={12} aria-hidden="true" />
             </span>
             <span className="gov-resource-description">{resource.description}</span>
           </span>
@@ -215,7 +215,7 @@ export function GovernmentResourcesBanner() {
         <div className="gov-resources-heading">
           <div className="flex items-center justify-center gap-3 text-center">
             <span className="gov-resources-heading-icon" aria-hidden="true">
-              <Landmark size={22} />
+              <Icon3D name="landmark" size={22} />
             </span>
             <div>
               <h2 id="government-resources-title" className="display-font text-xl font-bold tracking-[-.04em] text-[#102f43] sm:text-2xl">

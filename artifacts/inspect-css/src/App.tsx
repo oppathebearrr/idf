@@ -4,22 +4,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import {
-  ArrowDown,
-  Check,
-  ChevronRight,
-  CircleHelp,
-  Download,
-  ExternalLink,
-  Layers3,
-  Lock,
-  ScanLine,
-  Search,
-  ShieldCheck,
-  CreditCard,
-  GlobeLock,
-  AlertTriangle,
-} from 'lucide-react';
+import { Icon3D } from '@/components/Icon3D';
 import {
   Route,
   Switch,
@@ -60,9 +45,9 @@ function Home() {
   };
 
   const extensionFeatures = [
-    { icon: <Search />, number: '01', title: 'Surface review', text: 'Identify suspicious site structure, invisible attributes, and hidden elements.' },
-    { icon: <Layers3 />, number: '02', title: 'Asset trace', text: 'Review embedded images, fonts, and external page resources safely.' },
-    { icon: <Lock />, number: '03', title: 'Local-first control', text: 'No account, no telemetry, and no remote dashboard. Review stays in your browser.' },
+    { icon: `${HOME_URL}feature-icons/surface-review-3d.png`, number: 'A / 01', title: 'Surface review', text: 'Identify suspicious site structure, invisible attributes, and hidden elements.' },
+    { icon: `${HOME_URL}feature-icons/asset-trace-3d.png`, number: 'A / 02', title: 'Asset trace', text: 'Review embedded images, fonts, and external page resources safely.' },
+    { icon: `${HOME_URL}feature-icons/local-first-3d.png`, number: 'A / 03', title: 'Local-first control', text: 'No account, no telemetry, and no remote dashboard. Review stays in your browser.' },
   ];
 
   return (
@@ -94,7 +79,7 @@ function Home() {
             <Link href="/card-security" className="outline-focus transition-colors hover:text-[#9a6f20]">Card Security</Link>
             <Link href="/report-fraud" className="outline-focus transition-colors hover:text-[#9a6f20]">Report Fraud</Link>
             <a href="https://microsoft--proipscanner.replit.app/" target="_blank" rel="noopener noreferrer" className="outline-focus transition-colors hover:text-[#9a6f20] inline-flex items-center gap-1">
-              IP Lookup <ExternalLink size={14} />
+              IP Lookup <Icon3D name="external-link" size={14} />
             </a>
           </nav>
         </div>
@@ -123,54 +108,58 @@ function Home() {
                 href="#extension"
                 className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#17364a] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#e4bd62] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
               >
-                <ScanLine size={18} />
+                <Icon3D name="scan-line" size={18} />
                 Browser Extension
               </a>
               <Link
                 href="/report-fraud"
                 className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
               >
-                <AlertTriangle size={18} />
+                <Icon3D name="warning" size={18} />
                 Report a Fraud
               </Link>
               <Link
                 href="/card-security"
                 className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
               >
-                <CreditCard size={18} />
+                <Icon3D name="credit-card" size={18} />
                 Card Security Tool
               </Link>
             </div>
             
-            <div className="hero-reveal hero-reveal-delay-3 mt-16 grid grid-cols-1 md:grid-cols-4 gap-4 w-full max-w-[1200px]">
-              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
-                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><ShieldCheck className="text-[#17364a] w-5 h-5" /></div>
-                <div>
-                  <h3 className="font-bold text-[#102f43] text-sm">Identify Scams</h3>
-                  <p className="text-xs text-[#4e6666] mt-1">Tools to inspect unsafe websites and recognize phishing.</p>
-                </div>
-              </div>
-              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
-                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><AlertTriangle className="text-[#17364a] w-5 h-5" /></div>
-                <div>
-                  <h3 className="font-bold text-[#102f43] text-sm">Document Fraud</h3>
-                  <p className="text-xs text-[#4e6666] mt-1">Organize incident details safely before disputing charges.</p>
-                </div>
-              </div>
-              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
-                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><Lock className="text-[#17364a] w-5 h-5" /></div>
-                <div>
-                  <h3 className="font-bold text-[#102f43] text-sm">Protect Data</h3>
-                  <p className="text-xs text-[#4e6666] mt-1">Generate secure local documents with zero data transmission.</p>
-                </div>
-              </div>
-              <div className="bg-white border border-[#17364a]/15 p-4 shadow-sm text-left flex flex-col items-start gap-3">
-                <div className="bg-[#eef1eb] p-2 rounded-full shrink-0"><GlobeLock className="text-[#17364a] w-5 h-5" /></div>
-                <div>
-                  <h3 className="font-bold text-[#102f43] text-sm">Track Sources</h3>
-                  <p className="text-xs text-[#4e6666] mt-1">Look up suspicious IPs and networks with our partner tool.</p>
-                </div>
-              </div>
+            <div className="mission-list hero-reveal hero-reveal-delay-3 mt-16 w-full max-w-[1200px]">
+              <article className="mission-item">
+                <span className="mission-icon">
+                  <img src={`${HOME_URL}feature-icons/identify-scams-3d.png`} alt="" aria-hidden="true" />
+                </span>
+                <span className="mission-index">01 / SAFETY ACTION</span>
+                <h3>Identify Scams</h3>
+                <p>Tools to inspect unsafe websites and recognize phishing.</p>
+              </article>
+              <article className="mission-item">
+                <span className="mission-icon">
+                  <img src={`${HOME_URL}feature-icons/document-fraud-3d.png`} alt="" aria-hidden="true" />
+                </span>
+                <span className="mission-index">02 / SAFETY ACTION</span>
+                <h3>Document Fraud</h3>
+                <p>Organize incident details safely before disputing charges.</p>
+              </article>
+              <article className="mission-item">
+                <span className="mission-icon">
+                  <img src={`${HOME_URL}feature-icons/protect-data-3d.png`} alt="" aria-hidden="true" />
+                </span>
+                <span className="mission-index">03 / SAFETY ACTION</span>
+                <h3>Protect Data</h3>
+                <p>Generate secure local documents with zero data transmission.</p>
+              </article>
+              <article className="mission-item">
+                <span className="mission-icon">
+                  <img src={`${HOME_URL}feature-icons/track-sources-3d.png`} alt="" aria-hidden="true" />
+                </span>
+                <span className="mission-index">04 / SAFETY ACTION</span>
+                <h3>Track Sources</h3>
+                <p>Look up suspicious IPs and networks with our partner tool.</p>
+              </article>
             </div>
           </div>
         </section>
@@ -196,26 +185,29 @@ function Home() {
                     className="download-button outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#d6b45d] px-6 text-sm font-extrabold uppercase tracking-[.07em] text-[#102f43] shadow-[5px_5px_0_#17364a] disabled:cursor-wait disabled:opacity-70"
                     data-testid="button-download-hero"
                   >
-                    {downloadState === 'checking' ? <ScanLine size={18} className="animate-pulse" /> : <Download size={18} />}
+                    {downloadState === 'checking' ? <Icon3D name="scan-line" size={18} className="animate-pulse" /> : <Icon3D name="download" size={18} />}
                     {downloadState === 'checking' ? 'Checking package…' : 'Download for Chrome'}
-                    <ArrowDown size={17} />
+                    <Icon3D name="arrow-down" size={17} />
                   </button>
                   <div className="mt-4 min-h-6 text-sm text-[#4e6666]" aria-live="polite" data-testid="status-download">
                     {downloadState === 'missing' ? (
-                      <span className="inline-flex items-center gap-2 text-[#b84635]"><CircleHelp size={15} /> The package is not published yet. Please try again shortly.</span>
+                      <span className="inline-flex items-center gap-2 text-[#b84635]"><Icon3D name="help" size={15} /> The package is not published yet. Please try again shortly.</span>
                     ) : (
-                      <span className="inline-flex items-center gap-2"><ShieldCheck size={15} /> Open source • Chromium native • No account required</span>
+                      <span className="inline-flex items-center gap-2"><Icon3D name="shield-check" size={15} /> Open source • Chromium native • No account required</span>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-1">
+              <div className="inspection-ledger w-full">
                 {extensionFeatures.map((feature) => (
-                  <article key={feature.number} className="feature-card border border-[#17364a]/15 bg-white p-5 shadow-[0_4px_12px_rgba(16,47,67,.03)] flex gap-5 items-start">
-                    <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-[#c39b4a]/60 bg-[#e2eadf] text-[#17364a]">{feature.icon}</span>
+                  <article key={feature.number} className="inspection-row">
+                    <span className="inspection-number">{feature.number}</span>
+                    <span className="ledger-icon">
+                      <img src={feature.icon} alt="" aria-hidden="true" />
+                    </span>
                     <div>
-                      <h3 className="display-font text-xl font-bold tracking-[-.03em] text-[#17364a]">{feature.title}</h3>
-                      <p className="mt-1 text-sm leading-6 text-[#4e6666]">{feature.text}</p>
+                      <h3>{feature.title}</h3>
+                      <p>{feature.text}</p>
                     </div>
                   </article>
                 ))}
@@ -229,39 +221,45 @@ function Home() {
           <div className="inspect-container">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
               <div className="order-2 lg:order-1 relative">
-                <div className="brief-card relative overflow-hidden border border-[#17364a]/35 bg-[#f8f7f2] shadow-[12px_12px_0_#c39b4a]">
-                  <div className="flex items-center justify-between border-b border-[#17364a]/15 bg-[#17364a] px-5 py-4 text-[#f8f7f2]">
-                    <div className="flex items-center gap-3">
-                      <span className="grid h-9 w-9 place-items-center rounded-full border border-[#d6b45d]/70">
-                        <CreditCard size={18} className="text-[#d6b45d]" />
+                <div className="card-dossier">
+                  <div className="card-dossier-stage">
+                    <div className="card-dossier-heading">
+                      <span className="mono-label text-[#d6b45d]">Privacy Tool / 03</span>
+                      <h3>Card Authorization Document</h3>
+                      <span className="card-dossier-status">
+                        <Icon3D name="lock" size={12} aria-hidden="true" />
+                        Browser only
                       </span>
-                      <div>
-                        <p className="mono-label text-[9px] text-[#d6b45d]">Privacy Tool</p>
-                        <p className="text-sm font-semibold">Card Authorization Document</p>
-                      </div>
                     </div>
-                    <span className="rounded-full border border-[#b6cbbd]/30 px-2 py-1 font-mono text-[9px] text-[#b6cbbd]">BROWSER ONLY</span>
+                    <img
+                      src={`${HOME_URL}feature-icons/card-document-3d.png`}
+                      alt=""
+                      aria-hidden="true"
+                      className="card-dossier-object"
+                    />
+                    <span className="card-dossier-orbit" aria-hidden="true" />
                   </div>
-                  <div className="relative p-6 sm:p-8 space-y-4">
-                    <div className="flex items-start gap-4">
-                      <Check className="w-5 h-5 text-green-700 mt-0.5 shrink-0" />
+
+                  <div className="card-dossier-checks">
+                    <div className="card-dossier-check">
+                      <span className="card-dossier-checkmark"><Icon3D name="check" size={15} /></span>
                       <div>
-                        <strong className="text-[#102f43] block">Generates a masked PDF locally</strong>
-                        <span className="text-sm text-[#4e6666]">Produces a document with only your card brand and last four digits visible.</span>
+                        <strong>Generates a masked PDF locally</strong>
+                        <span>Produces a document with only your card brand and last four digits visible.</span>
                       </div>
                     </div>
-                    <div className="flex items-start gap-4">
-                      <Check className="w-5 h-5 text-green-700 mt-0.5 shrink-0" />
+                    <div className="card-dossier-check">
+                      <span className="card-dossier-checkmark"><Icon3D name="check" size={15} /></span>
                       <div>
-                        <strong className="text-[#102f43] block">Zero data transmission</strong>
-                        <span className="text-sm text-[#4e6666]">Does not transmit your card data to any server, database, or API.</span>
+                        <strong>Zero data transmission</strong>
+                        <span>Does not transmit your card data to any server, database, or API.</span>
                       </div>
                     </div>
-                    <div className="flex items-start gap-4">
-                      <Check className="w-5 h-5 text-green-700 mt-0.5 shrink-0" />
+                    <div className="card-dossier-check">
+                      <span className="card-dossier-checkmark"><Icon3D name="check" size={15} /></span>
                       <div>
-                        <strong className="text-[#102f43] block">No charges or saved payments</strong>
-                        <span className="text-sm text-[#4e6666]">This is a document generator only. It cannot and does not process payments.</span>
+                        <strong>No charges or saved payments</strong>
+                        <span>This is a document generator only. It cannot and does not process payments.</span>
                       </div>
                     </div>
                   </div>
@@ -281,7 +279,7 @@ function Home() {
                     className="outline-focus inline-flex min-h-14 items-center justify-center gap-3 border-2 border-[#17364a] bg-[#f8f7f2] px-8 text-sm font-extrabold uppercase tracking-[.07em] text-[#17364a] shadow-[5px_5px_0_#c39b4a] transition-transform hover:-translate-y-1 active:translate-y-0"
                   >
                     Open Card Security
-                    <ChevronRight size={18} />
+                    <Icon3D name="chevron-right" size={18} />
                   </Link>
                 </div>
               </div>
@@ -293,7 +291,7 @@ function Home() {
         <section className="bg-[#17364a] py-10 text-[#f4f3ee] border-b border-[#20253c]/15">
           <div className="inspect-container flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <GlobeLock className="text-[#d6b45d] w-8 h-8 shrink-0" />
+              <Icon3D name="globe-lock" className="text-[#d6b45d] w-8 h-8 shrink-0" size={32} />
               <div>
                 <h2 className="display-font text-xl font-bold tracking-tight text-white">Investigating a suspicious website?</h2>
                 <p className="text-sm text-white/70 mt-1">Look up publicly available network details associated with an IP address.</p>
@@ -305,7 +303,7 @@ function Home() {
               rel="noopener noreferrer"
               className="outline-focus inline-flex min-h-12 shrink-0 items-center justify-center gap-2 border-2 border-[#d6b45d] bg-[#d6b45d] px-6 text-xs font-extrabold uppercase tracking-[.07em] text-[#102f43] shadow-[4px_4px_0_#f4f3ee] transition-transform hover:-translate-y-1 active:translate-y-0"
             >
-              IP Lookup <ExternalLink size={16} />
+              IP Lookup <Icon3D name="external-link" size={16} />
             </a>
           </div>
         </section>

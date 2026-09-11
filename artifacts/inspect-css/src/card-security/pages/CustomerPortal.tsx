@@ -4,16 +4,7 @@ import type { CustomerInput } from "@/card-security/lib/types";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  AlertTriangle,
-  ArrowLeft,
-  Check,
-  ChevronRight,
-  CreditCard,
-  FileText,
-  Info,
-  ShieldCheck,
-} from "lucide-react";
+import { Icon3D } from "@/components/Icon3D";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -429,7 +420,7 @@ function StepOne({
         </div>
         <StepActions>
           <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-            Continue <ChevronRight className="ml-2 w-5 h-5" />
+            Continue <Icon3D name="chevron-right" size={20} className="ml-2" />
           </Button>
         </StepActions>
       </form>
@@ -553,7 +544,7 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
       />
       <div className="p-6 sm:p-8 space-y-6">
         <div className="bg-[#dce7de] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3">
-          <Info className="w-5 h-5 text-[#17364a] shrink-0 mt-0.5" />
+          <Icon3D name="info" size={20} className="text-[#17364a] shrink-0 mt-0.5" />
           <div>
             <strong className="font-bold block mb-1">Private browser entry</strong>
             <p className="text-sm leading-relaxed">
@@ -658,16 +649,16 @@ function StepTwo({ onNext, onBack }: { onNext: (values: CardSummary) => void; on
           <FieldError error={errors.name} id="err-card-name" />
         </div>
         <p className="text-xs text-[#4e6666] flex items-start gap-2">
-          <CreditCard className="h-4 w-4 shrink-0 mt-0.5" />
+          <Icon3D name="credit-card" size={16} className="shrink-0 mt-0.5" />
           This is a standalone debt non-authorization declaration, not a charge or a saved payment method.
         </p>
       </div>
       <StepActions>
         <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
-          <ArrowLeft className="mr-2 w-4 h-4" /> Previous
+          <Icon3D name="arrow-left" size={16} className="mr-2" /> Previous
         </Button>
         <Button type="submit" size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-          Continue <ChevronRight className="ml-2 w-5 h-5" />
+          Continue <Icon3D name="chevron-right" size={20} className="ml-2" />
         </Button>
       </StepActions>
     </form>
@@ -708,7 +699,7 @@ function StepThree({
         <div className="border-2 border-[#17364a]/25 rounded bg-[#f8f7f2] overflow-hidden">
           <div className="bg-[#eef1eb] border-b-2 border-[#17364a]/25 px-4 py-2 flex items-center justify-between">
             <span className="font-bold text-[#102f43] flex items-center gap-2 text-sm">
-              <FileText className="w-4 h-4 text-[#17364a]" /> Debt non-authorization declaration
+              <Icon3D name="file-text" size={16} className="text-[#17364a]" /> Debt non-authorization declaration
             </span>
             <span className="text-xs font-bold uppercase text-[#4e6666] bg-[#f8f7f2] px-2 py-0.5 border border-[#17364a]/15 rounded">
               Version {config.termsVersion}
@@ -741,10 +732,10 @@ function StepThree({
       </div>
       <StepActions>
         <Button variant="outline" onClick={onBack} type="button" className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
-          <ArrowLeft className="mr-2 w-4 h-4" /> Previous
+          <Icon3D name="arrow-left" size={16} className="mr-2" /> Previous
         </Button>
         <Button onClick={handleNext} size="lg" className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]" disabled={!accepted}>
-          Proceed to sign <ChevronRight className="ml-2 w-5 h-5" />
+          Proceed to sign <Icon3D name="chevron-right" size={20} className="ml-2" />
         </Button>
       </StepActions>
     </div>
@@ -793,7 +784,7 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => P
       />
       <div className="p-6 sm:p-8">
         <div className="bg-[#f8f7f2] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3 mb-8">
-          <Info className="w-5 h-5 text-[#9a6f20] shrink-0 mt-0.5" />
+            <Icon3D name="info" size={20} className="text-[#9a6f20] shrink-0 mt-0.5" />
           <p className="text-sm font-medium leading-relaxed">
             By typing your name below, you acknowledge that you are providing an electronic signature for this document. The completed document is generated locally in your browser, and your signature is not transmitted to or stored on a server.
           </p>
@@ -828,10 +819,10 @@ function StepFour({ onSubmit, onBack }: { onSubmit: (signatureName: string) => P
       </div>
       <StepActions>
         <Button variant="outline" onClick={onBack} type="button" disabled={isSubmitting} className="h-12 px-6 border-2 border-[#17364a] text-[#17364a] font-extrabold uppercase tracking-[.05em] hover:bg-[#eef1eb] shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a] rounded-md flex items-center justify-center w-full sm:w-auto">
-          <ArrowLeft className="mr-2 w-4 h-4" /> Previous
+          <Icon3D name="arrow-left" size={16} className="mr-2" /> Previous
         </Button>
         <Button type="submit" size="lg" disabled={isSubmitting} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-8 rounded-md flex items-center justify-center shadow-[5px_5px_0_#c39b4a] w-full sm:w-auto transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-          <Check className="mr-3 h-5 w-5" /> {isSubmitting ? "Completing…" : "Complete document"}
+          <Icon3D name="check" size={20} className="mr-3" /> {isSubmitting ? "Completing…" : "Complete document"}
         </Button>
       </StepActions>
     </form>

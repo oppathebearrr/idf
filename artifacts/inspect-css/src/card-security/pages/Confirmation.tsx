@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AlertTriangle, CheckCircle, Download, FileText, Info, Printer, RotateCcw, ArrowRight } from "lucide-react";
+import { Icon3D } from "@/components/Icon3D";
 import { Button } from "@/components/ui/button";
 import { browserDateOnly, browserDateTime, downloadAuthorizationPdf } from "@/card-security/lib/browser-document";
 import { useAuthorizationSession } from "@/card-security/lib/authorization-session";
@@ -22,13 +22,13 @@ export default function Confirmation() {
       <SharedLayout>
         <div className="flex-1 w-full flex items-center justify-center p-4">
           <div className="max-w-md w-full border border-[#17364a]/25 bg-[#f8f7f2] p-8 shadow-[8px_8px_0_rgba(23,54,74,0.05)] text-center">
-            <AlertTriangle className="h-12 w-12 mx-auto text-[#b84635] mb-4" />
+            <Icon3D name="warning" size={48} className="mx-auto text-[#b84635] mb-4" />
             <h1 className="display-font text-2xl font-bold text-[#102f43] mb-2">Browser session ended</h1>
             <p className="text-[#4e6666] text-sm font-medium mb-8 leading-relaxed">
               This document existed only in the previous browser session. A refresh, closed tab, or new session clears it. No server record can restore it.
             </p>
             <Button onClick={startNew} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-6 rounded-md shadow-[5px_5px_0_#c39b4a] w-full transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-              <RotateCcw className="mr-2 h-4 w-4" /> Start a new document
+              <Icon3D name="rotate" size={16} className="mr-2" /> Start a new document
             </Button>
           </div>
         </div>
@@ -65,7 +65,7 @@ export default function Confirmation() {
 
         <div className="no-print mb-8">
           <div className="flex items-center gap-3 mb-4 text-[#17364a] font-bold tracking-tight uppercase text-sm">
-            <CheckCircle className="w-6 h-6 text-green-600" />
+            <Icon3D name="success" size={24} className="text-green-600" />
             <span className="text-green-700">Document complete</span>
           </div>
           <h1 className="text-3xl font-bold text-[#102f43] mb-2">Your debt non-authorization declaration is ready</h1>
@@ -77,7 +77,7 @@ export default function Confirmation() {
         <article id="print-document" className="bg-[#f8f7f2] border-2 border-[#17364a]/25 rounded shadow-sm print:border-0 print:shadow-none">
           <div className="border-b-2 border-[#17364a]/25 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <span className="font-bold text-[#102f43] flex items-center gap-2">
-              <FileText className="w-5 h-5 text-[#17364a] print:hidden" /> Completed debt non-authorization declaration
+              <Icon3D name="file-text" size={20} className="text-[#17364a] print:hidden" /> Completed debt non-authorization declaration
             </span>
             <div className="flex items-center gap-2 text-sm bg-[#f4f3ee] px-3 py-1.5 border border-[#17364a]/15 rounded">
               <span className="font-bold text-[#4e6666] uppercase tracking-widest text-xs">Local reference</span>
@@ -87,7 +87,7 @@ export default function Confirmation() {
 
           <div className="p-6 sm:p-8 space-y-8">
             <div className="no-print bg-[#dce7de] border-l-4 border-[#c39b4a] p-4 text-[#102f43] flex items-start gap-3">
-              <Info className="w-5 h-5 text-[#17364a] shrink-0 mt-0.5" />
+              <Icon3D name="info" size={20} className="text-[#17364a] shrink-0 mt-0.5" />
               <div>
                 <strong className="font-bold block mb-1">Keep this document</strong>
                 <p className="text-sm font-medium leading-relaxed">
@@ -188,27 +188,27 @@ export default function Confirmation() {
             disabled={completed.binLookup.status === "pending"}
             className="flex-1 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 rounded-md shadow-[5px_5px_0_#c39b4a] flex items-center justify-center transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]"
           >
-            <Download className="mr-2 h-5 w-5" /> {completed.binLookup.status === "pending" ? "Preparing issuer details…" : "Download PDF"}
+            <Icon3D name="download" size={20} className="mr-2" /> {completed.binLookup.status === "pending" ? "Preparing issuer details…" : "Download PDF"}
           </Button>
           <Button
             onClick={() => window.print()}
             disabled={completed.binLookup.status === "pending"}
             className="flex-1 bg-[#f8f7f2] hover:bg-[#eef1eb] text-[#17364a] border-2 border-[#17364a] font-extrabold uppercase tracking-[.05em] h-12 rounded-md flex items-center justify-center shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a]"
           >
-            <Printer className="mr-2 h-5 w-5" /> {completed.binLookup.status === "pending" ? "Preparing issuer details…" : "Print"}
+            <Icon3D name="printer" size={20} className="mr-2" /> {completed.binLookup.status === "pending" ? "Preparing issuer details…" : "Print"}
           </Button>
         </div>
 
         <div className="no-print mt-6 bg-[#f8f7f2] border border-[#17364a]/25 p-5 text-center text-sm text-[#4e6666] shadow-sm rounded">
           <p className="mb-2">Documenting a disputed charge or potential scam?</p>
           <a href={`${import.meta.env.BASE_URL}report-fraud`} className="text-[#17364a] font-bold hover:text-[#9a6f20] inline-flex items-center justify-center transition-colors">
-            Use the Report a Fraud tool to organize your incident details <ArrowRight className="ml-1 w-4 h-4" />
+            Use the Report a Fraud tool to organize your incident details <Icon3D name="arrow-right" size={16} className="ml-1" />
           </a>
         </div>
 
         <div className="no-print mt-8 text-center">
           <Button variant="link" className="text-[#17364a] font-bold" onClick={startNew}>
-            <RotateCcw className="mr-2 h-4 w-4" /> Start a new document
+            <Icon3D name="rotate" size={16} className="mr-2" /> Start a new document
           </Button>
         </div>
       </div>

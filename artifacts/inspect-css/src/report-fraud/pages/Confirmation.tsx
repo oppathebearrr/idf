@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AlertTriangle, CheckCircle, Download, FileText, Printer, RotateCcw, ExternalLink, ShieldAlert } from "lucide-react";
+import { Icon3D } from "@/components/Icon3D";
 import { Button } from "@/components/ui/button";
 import { browserDateTime, downloadFraudReportPdf } from "../lib/browser-document";
 import { formatAmountLost, useFraudSession } from "../lib/fraud-session";
@@ -23,13 +23,13 @@ export default function Confirmation() {
       <SharedLayout>
         <div className="flex-1 w-full flex items-center justify-center p-4">
           <div className="max-w-md w-full border border-[#17364a]/25 bg-[#f8f7f2] p-8 shadow-[8px_8px_0_rgba(23,54,74,0.05)] text-center">
-            <AlertTriangle className="h-12 w-12 mx-auto text-[#b84635] mb-4" />
+            <Icon3D name="warning" size={48} className="mx-auto text-[#b84635] mb-4" />
             <h1 className="display-font text-2xl font-bold text-[#102f43] mb-2">Session ended</h1>
             <p className="text-[#4e6666] text-sm font-medium mb-8 leading-relaxed">
               This summary existed only in your previous browser session. A refresh, closed tab, or new session clears it for your privacy.
             </p>
             <Button onClick={startNew} className="bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 px-6 rounded-md shadow-[5px_5px_0_#c39b4a] w-full transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]">
-              <RotateCcw className="mr-2 h-4 w-4" /> Start a new summary
+              <Icon3D name="rotate" size={16} className="mr-2" /> Start a new summary
             </Button>
           </div>
         </div>
@@ -60,7 +60,7 @@ export default function Confirmation() {
 
         <div className="no-print mb-8">
           <div className="flex items-center gap-3 mb-4 text-[#17364a] font-bold tracking-tight uppercase text-sm">
-            <CheckCircle className="w-6 h-6 text-green-600" />
+            <Icon3D name="success" size={24} className="text-green-600" />
             <span className="text-green-700">Summary complete</span>
           </div>
           <h1 className="text-3xl font-bold text-[#102f43] mb-2">Your Incident Summary Has Been Prepared</h1>
@@ -74,7 +74,7 @@ export default function Confirmation() {
             <article className="bg-[#f8f7f2] border-2 border-[#17364a]/25 rounded shadow-sm print:border-0 print:shadow-none mb-8">
               <div className="border-b-2 border-[#17364a]/25 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <span className="font-bold text-[#102f43] flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-[#17364a] print:hidden" /> Incident Summary
+                  <Icon3D name="file-text" size={20} className="text-[#17364a] print:hidden" /> Incident Summary
                 </span>
                 <div className="flex items-center gap-2 text-sm bg-[#f4f3ee] px-3 py-1.5 border border-[#17364a]/15 rounded">
                   <span className="font-bold text-[#4e6666] uppercase tracking-widest text-xs">Local Ref</span>
@@ -129,13 +129,13 @@ export default function Confirmation() {
                 onClick={() => downloadFraudReportPdf(completed)}
                 className="flex-1 bg-[#17364a] hover:bg-[#102f43] text-[#e4bd62] font-extrabold uppercase tracking-[.05em] h-12 rounded-md shadow-[5px_5px_0_#c39b4a] flex items-center justify-center transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[2px_2px_0_#c39b4a]"
               >
-                <Download className="mr-2 h-5 w-5" /> Download PDF
+                <Icon3D name="download" size={20} className="mr-2" /> Download PDF
               </Button>
               <Button
                 onClick={() => window.print()}
                 className="flex-1 bg-[#f8f7f2] hover:bg-[#eef1eb] text-[#17364a] border-2 border-[#17364a] font-extrabold uppercase tracking-[.05em] h-12 rounded-md flex items-center justify-center shadow-[3px_3px_0_#17364a] transition-transform active:translate-y-1 active:translate-x-1 active:shadow-[1px_1px_0_#17364a]"
               >
-                <Printer className="mr-2 h-5 w-5" /> Print
+                <Icon3D name="printer" size={20} className="mr-2" /> Print
               </Button>
             </div>
             
@@ -170,7 +170,7 @@ export default function Confirmation() {
           <aside className="no-print">
             <div className="bg-white border-2 border-[#b84635]/20 rounded-md p-6 shadow-sm sticky top-6">
               <h3 className="font-bold text-lg text-[#102f43] mb-4 flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-[#b84635]" />
+                <Icon3D name="shield-alert" size={20} className="text-[#b84635]" />
                 Crucial Next Steps
               </h3>
               
@@ -187,19 +187,19 @@ export default function Confirmation() {
                   <ul className="space-y-3 text-sm">
                     <li>
                       <a href="https://reportfraud.ftc.gov" target="_blank" rel="noopener noreferrer" className="text-[#17364a] font-bold hover:text-[#9a6f20] inline-flex items-center gap-1 group">
-                        FTC ReportFraud <ExternalLink className="w-3 h-3 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+                        FTC ReportFraud <Icon3D name="external-link" size={12} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
                       </a>
                       <p className="text-[#4e6666] text-xs mt-0.5">For scams and bad business practices.</p>
                     </li>
                     <li>
                       <a href="https://www.identitytheft.gov" target="_blank" rel="noopener noreferrer" className="text-[#17364a] font-bold hover:text-[#9a6f20] inline-flex items-center gap-1 group">
-                        IdentityTheft.gov <ExternalLink className="w-3 h-3 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+                        IdentityTheft.gov <Icon3D name="external-link" size={12} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
                       </a>
                       <p className="text-[#4e6666] text-xs mt-0.5">for your personal info was compromised.</p>
                     </li>
                     <li>
                       <a href="https://www.ic3.gov" target="_blank" rel="noopener noreferrer" className="text-[#17364a] font-bold hover:text-[#9a6f20] inline-flex items-center gap-1 group">
-                        FBI IC3 <ExternalLink className="w-3 h-3 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
+                        FBI IC3 <Icon3D name="external-link" size={12} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
                       </a>
                       <p className="text-[#4e6666] text-xs mt-0.5">For internet-facilitated crimes.</p>
                     </li>

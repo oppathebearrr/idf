@@ -845,3 +845,397 @@ button:focus-visible {
     inset: -1px;
   }
 }
+
+/* Redesigned Sections Integration */
+.card-dossier {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgb(214 180 93 / 0.6);
+  background: #17364a;
+  box-shadow:
+    12px 14px 0 #c39b4a,
+    0 28px 54px rgb(16 47 67 / 0.2);
+  transform: perspective(1200px) rotateY(1.5deg) rotateX(0.5deg);
+  transform-origin: center;
+  transition: transform 300ms ease, box-shadow 300ms ease;
+}
+
+.card-dossier::before {
+  content: "";
+  position: absolute;
+  inset: 10px -10px -10px 10px;
+  z-index: -1;
+  border: 1px solid rgb(23 54 74 / 0.22);
+  background: #b6cbbd;
+}
+
+.card-dossier:hover {
+  box-shadow:
+    15px 17px 0 #c39b4a,
+    0 34px 64px rgb(16 47 67 / 0.24);
+  transform: perspective(1200px) rotateY(0deg) rotateX(0deg) translateY(-4px);
+}
+
+.card-dossier-stage {
+  position: relative;
+  min-height: 230px;
+  overflow: hidden;
+  padding: 28px;
+  background:
+    linear-gradient(115deg, rgb(255 255 255 / 0.035), transparent 42%),
+    repeating-linear-gradient(90deg, transparent 0 44px, rgb(214 180 93 / 0.045) 44px 45px),
+    #17364a;
+}
+
+.card-dossier-stage::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d6b45d 28%, #d6b45d 72%, transparent);
+}
+
+.card-dossier-heading {
+  position: relative;
+  z-index: 3;
+  width: 45%;
+}
+
+.card-dossier-heading h3 {
+  margin-top: 9px;
+  color: #f8f7f2;
+  font-family: var(--app-font-serif);
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+}
+
+.card-dossier-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 22px;
+  border: 1px solid rgb(182 203 189 / 0.42);
+  padding: 7px 10px;
+  color: #d9e1df;
+  font-family: var(--app-font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.06);
+}
+
+.card-dossier-object {
+  position: absolute;
+  top: -25px;
+  right: -9px;
+  z-index: 2;
+  width: min(64%, 315px);
+  height: auto;
+  filter: drop-shadow(0 24px 18px rgb(4 22 34 / 0.34));
+  transform: rotate(-2deg);
+  transition: transform 400ms cubic-bezier(.2,.8,.2,1);
+}
+
+.card-dossier:hover .card-dossier-object {
+  transform: rotate(0deg) translateY(-5px) scale(1.02);
+}
+
+.card-dossier-orbit {
+  position: absolute;
+  top: 30px;
+  right: 25px;
+  width: 190px;
+  height: 190px;
+  border: 1px solid rgb(214 180 93 / 0.18);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 18px rgb(214 180 93 / 0.035),
+    0 0 0 48px rgb(182 203 189 / 0.025);
+}
+
+.card-dossier-checks {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 1px;
+  padding: 10px;
+  background: #b6cbbd;
+}
+
+.card-dossier-check {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  min-height: 76px;
+  padding: 12px 15px;
+  border-left: 2px solid transparent;
+  background: rgb(248 247 242 / 0.45);
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.38);
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+}
+
+.card-dossier-check:hover {
+  border-left-color: #9a6f20;
+  background: rgb(248 247 242 / 0.7);
+  transform: translateX(3px);
+}
+
+.card-dossier-checkmark {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgb(23 54 74 / 0.32);
+  background: #17364a;
+  color: #d6b45d;
+  box-shadow: 3px 3px 0 rgb(154 111 32 / 0.3);
+}
+
+.card-dossier-check strong,
+.card-dossier-check span {
+  display: block;
+}
+
+.card-dossier-check strong {
+  color: #102f43;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.card-dossier-check div > span {
+  margin-top: 4px;
+  color: #3f5959;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+@media (max-width: 640px) {
+  .card-dossier {
+    box-shadow:
+      8px 10px 0 #c39b4a,
+      0 22px 44px rgb(16 47 67 / 0.18);
+    transform: none;
+  }
+
+  .card-dossier-stage {
+    min-height: 330px;
+    padding: 24px;
+  }
+
+  .card-dossier-heading {
+    width: 100%;
+  }
+
+  .card-dossier-heading h3 {
+    max-width: 230px;
+  }
+
+  .card-dossier-status {
+    margin-top: 13px;
+  }
+
+  .card-dossier-object {
+    top: 92px;
+    right: 50%;
+    width: 245px;
+    transform: translateX(50%) rotate(-2deg);
+  }
+
+  .card-dossier:hover .card-dossier-object {
+    transform: translateX(50%) rotate(0deg) translateY(-3px);
+  }
+
+  .card-dossier-orbit {
+    top: 112px;
+    right: 50%;
+    width: 175px;
+    height: 175px;
+    transform: translateX(50%);
+  }
+
+  .card-dossier-check {
+    grid-template-columns: 32px minmax(0, 1fr);
+    min-height: 0;
+    padding: 13px 11px;
+  }
+}
+
+.mission-list {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid rgb(195 155 74 / 0.65);
+}
+
+.mission-item {
+  position: relative;
+  min-height: 212px;
+  padding: 23px 22px 22px;
+  border-right: 1px solid rgb(23 54 74 / 0.15);
+  transition: background-color 180ms ease, transform 180ms ease;
+  text-align: left;
+}
+
+.mission-item:last-child {
+  border-right: 0;
+}
+
+.mission-item:hover {
+  background: rgb(23 54 74 / 0.03);
+  transform: translateY(-4px);
+}
+
+.mission-icon {
+  display: grid;
+  width: 62px;
+  height: 62px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #d6b45d;
+}
+
+.mission-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgb(16 47 67 / 0.16));
+}
+
+.mission-index {
+  display: block;
+  margin-top: 15px;
+  color: #5f726f;
+  font-family: var(--app-font-mono);
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: .13em;
+}
+
+.mission-item h3 {
+  margin-top: 8px;
+  color: #102f43;
+  font-family: var(--app-font-serif);
+  font-size: 17px;
+  letter-spacing: -.035em;
+}
+
+.mission-item p {
+  margin-top: 8px;
+  color: #4e6666;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.inspection-ledger {
+  position: relative;
+  border-top: 2px solid #17364a;
+}
+
+.inspection-row {
+  display: grid;
+  grid-template-columns: 72px 76px minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 21px 0;
+  border-bottom: 1px solid rgb(23 54 74 / 0.3);
+  transition: padding-left 170ms ease, background-color 170ms ease;
+}
+
+.inspection-row:hover {
+  padding-left: 12px;
+  background: rgb(23 54 74 / 0.04);
+}
+
+.inspection-number {
+  color: #8a6728;
+  font-family: var(--app-font-mono);
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: .1em;
+}
+
+.ledger-icon {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  background: transparent;
+  border: 0;
+  color: #17364a;
+}
+
+.ledger-icon img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px rgb(16 47 67 / 0.14));
+}
+
+.inspection-row h3 {
+  font-family: var(--app-font-serif);
+  font-size: 20px;
+  letter-spacing: -.04em;
+  color: #102f43;
+}
+
+.inspection-row p {
+  margin-top: 4px;
+  max-width: 560px;
+  color: #4e6666;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .mission-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .mission-item:nth-child(2) {
+    border-right: 0;
+  }
+  .mission-item {
+    min-height: 194px;
+    border-bottom: 1px solid rgb(23 54 74 / 0.15);
+  }
+  .mission-item:nth-child(n+3) {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 440px) {
+  .mission-list {
+    grid-template-columns: 1fr;
+  }
+  .mission-item, .mission-item:nth-child(2) {
+    min-height: 0;
+    padding: 20px 0;
+    border-right: 0;
+    border-bottom: 1px solid rgb(23 54 74 / 0.15);
+  }
+  .mission-item:last-child {
+    border-bottom: 0;
+  }
+  .mission-index {
+    margin-top: 13px;
+  }
+  .inspection-row {
+    grid-template-columns: 44px 52px minmax(0, 1fr);
+    gap: 11px;
+  }
+  .ledger-icon {
+    width: 46px;
+    height: 46px;
+  }
+  .inspection-row h3 {
+    font-size: 17px;
+  }
+}
