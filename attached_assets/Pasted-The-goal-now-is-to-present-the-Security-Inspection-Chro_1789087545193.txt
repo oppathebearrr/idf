@@ -1,0 +1,47 @@
+The goal now is to present the **Security Inspection Chrome Extension** and **Card Security** as actual products, rather than simply presenting the current “Security Inspection” landing page.
+
+The current landing page is fine, but I want to shift the approach: **this should feel like a product-focused security platform page, not just a generic landing page.**
+
+All of these tools are being developed with the goal of helping people protect themselves from **hacking, scams, fraud, phishing, and other online crimes**. The overall website should communicate that mission clearly while creating an emotional sense of **safety, trust, protection, and confidence online**.
+
+### Overall Design Direction
+
+I want the landing page to have the visual credibility and seriousness of a **public-service or government-funded cybersecurity initiative**—something that feels established, trustworthy, and focused on helping people across the U.S. stay safe online.
+
+The design should make visitors immediately feel:
+
+* “I’m protected here.”
+* “This is trustworthy.”
+* “This is built to keep me safe.”
+* “These are legitimate security tools.”
+* “I can use this to protect myself online.”
+
+The design should feel **professional, secure, credible, modern, and approachable**, rather than overly technical or intimidating.
+
+### Products
+
+The page should prominently present the following products:
+
+1. **Security Inspection Chrome Extension**
+   A browser security tool designed to help users identify and protect themselves from potentially unsafe websites, scams, suspicious activity, and other online threats.
+
+2. **Card Security**
+   A security product focused on helping users protect their card-related information and stay safer from online fraud and scams.
+
+3. **IP Lookup**
+   This can be presented as a simple CTA rather than a full product section.
+
+   **CTA:** IP LOOKUP
+   **href:** `https://microsoft--proipscanner.replit.app/`
+
+### Important
+
+Please approach this as a **real cybersecurity product/platform**, not just a promotional landing page.
+
+Use the design to communicate a strong mission around **online safety and protection for people across the U.S.** The visual language can take inspiration from trusted public-service programs: clean layouts, strong credibility signals, security-focused visuals, reassuring messaging, and a clear sense of purpose.
+
+Please use your creativity to make the page feel **safe, trusted, polished, and authoritative**, while still being modern enough to feel like a professional technology product.
+
+The ultimate goal is for a visitor to land on the page and immediately understand:
+
+**“These tools are here to help protect me from online threats.”**

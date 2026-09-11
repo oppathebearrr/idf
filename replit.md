@@ -83,19 +83,16 @@ The deployment configuration lives in `artifacts/inspect-css/.replit-artifact/ar
 
 ## Product
 
-The landing page introduces Inspect CSS and provides:
+The Security Inspection platform provides public-service cybersecurity tools:
 
-- CSS inspection and computed-style exploration
-- Live CSS and attribute editing
-- DOM navigation
-- Website color palette inspection
-- Asset downloading
-- Chromium color-picker support
-- Selected-element quick actions for Edit, Duplicate, Apply preset, and Save as preset
-- Local text presets with a starter `Demo text` preset
-- Sanitized reusable blocks that can replace or insert DOM content
-- Preset management with rename/edit, duplicate, delete, import/export, undo, and page reset
-- A downloadable Chrome package
+1. **Security Inspection Chrome Extension**: A local-first browser extension for reviewing a live website's structure, styling, and assets to identify scams and hidden risks.
+   - CSS inspection and computed-style exploration
+   - Live CSS and attribute editing
+   - DOM navigation
+   - Selected-element quick actions for Edit, Duplicate, Apply preset, and Save as preset
+   - Local text presets and reusable blocks
+2. **Card Security**: A local-only secure document generator for card authorizations without transmitting sensitive data.
+3. **IP Lookup**: A quick external tool link for investigating suspicious IPs.
 
 ## Extension installation
 
